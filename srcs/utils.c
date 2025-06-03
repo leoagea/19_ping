@@ -1,28 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 14:49:23 by lagea            ###   ########.fr       */
+/*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
+/*   Updated: 2025/06/03 14:23:07 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/ping.h"
 
-int main(int ac, char **av)
+void print_error(const char *msg)
 {
-	(void)av;
-	t_data data;
-	
-	if (ac < 2){
-		usage();
-		return 1;
-	}
-	init_data(&data, ac);
-	free_data(&data);
-	
-	return 0;
+	fprintf(stderr, "%s\n", msg);
+}
+
+void usage(void)
+{
+	print_error("ping: missing host operand");
+	print_error("Try 'ping --help' for more information.");
 }

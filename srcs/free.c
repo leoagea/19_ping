@@ -1,28 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   free.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 14:49:23 by lagea            ###   ########.fr       */
+/*   Created: 2025/06/03 14:33:52 by lagea             #+#    #+#             */
+/*   Updated: 2025/06/03 14:59:16 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/ping.h"
 
-int main(int ac, char **av)
+static void freePointer(void **content)
 {
-	(void)av;
-	t_data data;
-	
-	if (ac < 2){
-		usage();
-		return 1;
+	if (*content)
+	{
+		free(*content);
+		*content = NULL;
 	}
-	init_data(&data, ac);
-	free_data(&data);
-	
-	return 0;
+}
+
+void free_data(t_data *data)
+{
+	freePointer((void **)&data->ping);
+	freePointer((void **)&data->stats);
 }
