@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 14:48:53 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/03 15:42:39 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define __STRUCT_H__
 
 #include <stddef.h>
+#include <netinet/in.h>
+#include <stdbool.h>
 
 typedef struct s_ping
 {
@@ -21,7 +23,10 @@ typedef struct s_ping
 	int		ping_count;
 	int		ping_interval;
 	int		ping_timeout;
-	char	*target_ip;
+	
+	bool	is_valid;
+	char 	*target_hostname;
+	in_addr_t	target_ip;
 }	t_ping;
 
 typedef struct s_ping_stats
@@ -36,6 +41,9 @@ typedef struct s_ping_stats
 
 typedef struct s_data
 {
+	int				ac;
+	char			**av;
+	
 	t_ping			*ping;
 	t_ping_stats	*stats;
 	size_t			ping_size;

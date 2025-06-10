@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 14:49:14 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/10 15:54:48 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <arpa/inet.h> // inet_pton
+#include <netdb.h>    // gethostbyname
+#include <string.h>  // strdup
+#include <sys/time.h> // struct timeval
 
 /*#############################################################################
 # Init.c
 #############################################################################*/
 
-void	init_data(t_data *data, int ac);
+void	init_data(t_data *data);
+void 	init_socket(t_data *data, t_ping *ping);
 
 /*#############################################################################
 # Utils.c
@@ -34,11 +40,20 @@ void	init_data(t_data *data, int ac);
 
 void 	print_error(const char *msg);
 void	usage(void);
+void	checkTarget(t_data *data, t_ping *ping, const char *target);
 
 /*#############################################################################
 # Free.c
 #############################################################################*/
 
-void free_data(t_data *data);
+void	freePointer(void **content);
+void 	free_data(t_data *data);
+
+/*#############################################################################
+# Debug.c
+#############################################################################*/
+
+void	debug_print_all_ping_struct(t_data *data);
+
 
 #endif
