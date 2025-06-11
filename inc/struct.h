@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 15:42:39 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/11 16:01:50 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,9 @@ typedef struct s_ping_stats
 	double	min_rtt;
 	double	max_rtt;
 	double	avg_rtt;
+
+	double 	next_ping_time;
+	double 	last_ping_time;
 }	t_ping_stats;
 
 typedef struct s_data

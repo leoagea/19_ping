@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/10 15:54:48 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/11 16:37:05 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>  // close
+#include <poll.h>   // poll
+#include <time.h>   // time, time_t
+#include <errno.h>   // errno, ENOPROTOOPT
 #include <arpa/inet.h> // inet_pton
 #include <netdb.h>    // gethostbyname
 #include <string.h>  // strdup
 #include <sys/time.h> // struct timeval
+#include <sys/socket.h> // socket, setsockopt
 
+#define PING_DEFAULT_COUNT 4
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 /*#############################################################################
 # Init.c
 #############################################################################*/
 
 void	init_data(t_data *data);
-void 	init_socket(t_data *data, t_ping *ping);
+void 	init_socket(t_ping *ping);
+
+/*#############################################################################
+# Event.c
+#############################################################################*/
+
+int event_loop(t_ping *ping, t_ping_stats *stats);
 
 /*#############################################################################
 # Utils.c
