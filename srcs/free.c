@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:33:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 16:26:02 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/11 14:22:32 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,13 @@ static void free_ping_struct(t_ping *ping, size_t size)
     {
         if (ping[i].target_hostname)
         {
-            free(ping[i].target_hostname);
-            ping[i].target_hostname = NULL;
+            freePointer((void **)&ping[i].target_hostname);
+            // ping[i].target_hostname = NULL;
+            if (ping[i].sockfd >= 0)
+            {
+                close(ping[i].sockfd);
+                ping[i].sockfd = -1; // Set to -1 to indicate it's closed
+            }
         }
         i++;
     }
