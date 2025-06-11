@@ -47,6 +47,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@echo "$(BLUE)Linking $(TARGET)...$(NC)"
 	@$(CC) $(CFLAGS) -I$(INC_DIR) -o $@ $(OBJS) $(LDFLAGS)
+	@sudo setcap cap_net_raw=ep $(TARGET)
 	@echo "$(GREEN)Build complete!$(NC)"
 
 ###############################################################################
