@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 16:48:55 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 18:36:03 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ typedef struct s_ping
 	int		ping_count;
 	int		ping_interval;
 	int		ping_timeout;
-	
+
 	bool	is_valid;
 	char 	*target_hostname;
 	in_addr_t	target_ip;

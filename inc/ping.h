@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 17:19:52 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 18:39:32 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,10 @@
 #include <string.h>  // strdup
 #include <sys/time.h> // struct timeval
 #include <sys/socket.h> // socket, setsockopt
+#include <netinet/ip_icmp.h> // ICMP protocol definitions
 
 #define PING_DEFAULT_COUNT 4
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MAX_PAYLOAD_SIZE 56
 
 /*#############################################################################
 # Global Variables
@@ -57,6 +58,12 @@ void 	init_socket(t_ping *ping);
 int event_loop(t_ping *ping, t_ping_stats *stats);
 
 /*#############################################################################
+# Request.c
+#############################################################################*/
+
+void build_echo_request(char *buf, size_t payload_len, int count);
+
+/*#############################################################################
 # Utils.c
 #############################################################################*/
 
@@ -66,6 +73,8 @@ void	checkTarget(t_ping *ping, const char *target);
 void	timeval_add(const struct timeval *a, const struct timeval *b, struct timeval *result);
 void	timeval_sub(const struct timeval *a, const struct timeval *b, struct timeval *result);
 int 	timeval_cmp(const struct timeval *a, const struct timeval *b);
+uint16_t checksum(void *buf, size_t len);
+void 	print_result(t_ping *ping, t_ping_stats *stats);
 
 /*#############################################################################
 # Free.c

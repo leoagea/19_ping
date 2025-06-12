@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 17:23:33 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 18:58:28 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,20 @@
 
 static int send_ping(t_ping *ping, t_ping_stats *stats)
 {
-	(void)stats; // stats is not used in this function, but could be used for logging or statistics
-	(void)ping; // ping is not used in this function, but could be used for sending the ping
+	(void)	stats; // stats is not used in this function, but could be used for logging or statistics
+	char buf[MAX_PAYLOAD_SIZE + sizeof(struct icmp)];
+	struct sockaddr_in dest_addr = {
+        .sin_family = AF_INET,
+        .sin_addr.s_addr = ping->target_ip
+    };
 	
-	// Implementation of sending an ICMP Echo Request
-	// This function should fill the ICMP packet and send it through the socket
-	// For simplicity, we assume it returns 0 on success
+	build_echo_request(&buf[0], MAX_PAYLOAD_SIZE, ping->ping_count);
+	
+	if (sendto(ping->sockfd, buf, sizeof(struct icmp) + MAX_PAYLOAD_SIZE, 0,
+			(struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0) {
+				perror("sendto failed");
+				return -1; // Indicate failure to send
+	}
 	return 0; // Placeholder for actual implementation
 }
 
@@ -108,6 +116,7 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 			if (ping->ping_timeout > 0 && diff.tv_sec >= ping->ping_timeout) {
 				stats->packets_lost++;
 				stats->last_ping_time = now; // Reset last ping time after timeout
+				ping->ping_count++;
 				continue; // Skip to next iteration
 			}
 		}
@@ -130,7 +139,7 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 				return -1;
 			}
 			stats->packets_sent++;
-			stats->last_ping_time = now;
+			gettimeofday(&stats->next_ping_time, NULL);
 			ping->ping_count++;
 		}
 	}
