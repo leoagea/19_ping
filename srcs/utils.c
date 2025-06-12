@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 15:16:13 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 17:12:29 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,46 @@ void checkTarget(t_ping *ping, const char *target)
 	}
 	
 	ping->is_valid = true;
+}
+
+void timeval_add(const struct timeval *a, const struct timeval *b, struct timeval *result)
+{
+    if (!a || !b || !result)
+        return;
+        
+    result->tv_sec = a->tv_sec + b->tv_sec;
+    result->tv_usec = a->tv_usec + b->tv_usec;
+    if (result->tv_usec >= 1000000) {
+        result->tv_sec++;
+        result->tv_usec -= 1000000;
+    }
+}
+
+void timeval_sub(const struct timeval *a, const struct timeval *b, struct timeval *result)
+{
+    if (!a || !b || !result)
+        return;
+        
+    result->tv_sec = a->tv_sec - b->tv_sec;
+    result->tv_usec = a->tv_usec - b->tv_usec;
+    if (result->tv_usec < 0) {
+        result->tv_sec--;
+        result->tv_usec += 1000000;
+    }
+}
+
+int timeval_cmp(const struct timeval *a, const struct timeval *b)
+{
+    if (!a || !b)
+        return 0;
+        
+    if (a->tv_sec < b->tv_sec)
+        return -1;
+    if (a->tv_sec > b->tv_sec)
+        return 1;
+    if (a->tv_usec < b->tv_usec)
+        return -1;
+    if (a->tv_usec > b->tv_usec)
+        return 1;
+    return 0;
 }

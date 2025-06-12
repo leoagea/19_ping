@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 16:44:06 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 17:19:52 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,9 @@ int event_loop(t_ping *ping, t_ping_stats *stats);
 void 	print_error(const char *msg);
 void	usage(void);
 void	checkTarget(t_ping *ping, const char *target);
+void	timeval_add(const struct timeval *a, const struct timeval *b, struct timeval *result);
+void	timeval_sub(const struct timeval *a, const struct timeval *b, struct timeval *result);
+int 	timeval_cmp(const struct timeval *a, const struct timeval *b);
 
 /*#############################################################################
 # Free.c

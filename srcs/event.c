@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/11 16:37:01 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 17:23:33 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,30 +34,83 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 	return 0; // Placeholder for actual implementation
 }
 
+static int safety_check(t_ping *ping, t_ping_stats *stats)
+{
+	if (!ping || !stats) {
+		print_error("Ping or stats structure is NULL.");
+		return -1;
+	}
+	if (!ping->is_valid) {
+		print_error("Ping structure is not valid.");
+		return -1;
+	}
+	
+	if (!ping->target_hostname && !ping->target_ip) {
+		print_error("Target hostname or IP is not set.");
+		return -1;
+	}
+	
+	if (ping->sockfd < 0) {
+		print_error("Socket is not valid.");
+		return -1;
+	}
+
+	return 0;
+}
+
 int event_loop(t_ping *ping, t_ping_stats *stats)
 {
 	fd_set read_fds;
-	struct timeval tv;
+	t_timeval tv, now, next_ping;
+
+	if (safety_check(ping, stats) < 0) {
+		return -1; // Safety check failed
+	}
+		
+	ping->nfds = ping->sockfd + 1;
+	gettimeofday(&stats->last_ping_time, NULL);
 
 	while (ping->ping_count < PING_DEFAULT_COUNT){
 		
 		FD_ZERO(&read_fds);
 		FD_SET(ping->sockfd, &read_fds);
 
-		stats->next_ping_time = stats->last_ping_time + ping->ping_interval;
-		double now = time(NULL);
-		double timeout = MAX(0, stats->next_ping_time - now);
+		gettimeofday(&now, NULL);
 		
-		tv.tv_sec = (long)timeout;
-		tv.tv_usec = (long)((timeout - tv.tv_sec) * 1000000);
+		// Calculate next ping time
+        next_ping = stats->last_ping_time;
+        next_ping.tv_sec += ping->ping_interval;
+
+        // Calculate timeout
+		timeval_sub(&next_ping, &now, &tv);
 		
-		int ready = select(ping->sockfd + 1, &read_fds, NULL, NULL, &tv);
+		if (tv.tv_sec < 0 || (tv.tv_sec == 0 && tv.tv_usec < 0)) {
+            tv.tv_sec = 0;
+            tv.tv_usec = 0;
+        }
+		
+		int ready = select(ping->nfds, &read_fds, NULL, NULL, &tv);
+		gettimeofday(&now, NULL); // Update current time after select
 		if (ready < 0) {
+			if (errno == EINTR) {
+				// Interrupted by a signal, continue the loop
+				continue;
+			}
 			perror("select failed");
 			return -1;
 		}
-
-		now = time(NULL);
+		
+		if (ready == 0) {
+			// Timeout occurred, no data available
+			t_timeval diff;
+			timeval_sub(&now, &stats->last_ping_time, &diff);
+			
+			if (ping->ping_timeout > 0 && diff.tv_sec >= ping->ping_timeout) {
+				stats->packets_lost++;
+				stats->last_ping_time = now; // Reset last ping time after timeout
+				continue; // Skip to next iteration
+			}
+		}
 		
 		if (ready && FD_ISSET(ping->sockfd, &read_fds)) {
 			// Handle incoming Echo Reply
@@ -68,9 +121,11 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 			stats->packets_received++;
 		}
 		
-		if (now >= stats->next_ping_time) {
+		if (timeval_cmp(&now, &next_ping) >= 0) {
 			// Send new Echo Request
 			if (send_ping(ping, stats) < 0) {
+				// TODO handle error
+				// For exemple, log the error or increment a failure counter
 				perror("Failed to send ping");
 				return -1;
 			}
