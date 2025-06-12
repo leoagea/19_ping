@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/11 16:01:50 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/11 17:05:30 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 typedef struct s_ping
 {
 	int		sockfd;
+	int  	nfds;
 	int		ping_count;
 	int		ping_interval;
 	int		ping_timeout;

@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:28:17 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/11 15:58:04 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 16:44:36 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,50 @@ void init_data(t_data *data)
 		print_error("Memory allocation failed for ping stats structure.");
 		exit(EXIT_FAILURE);
 	}
+
+	for (size_t i = 0; i < data->ping_size; i++)
+	{
+		memset(&data->ping[i], 0, sizeof(t_ping));
+		memset(&data->stats[i], 0, sizeof(t_ping_stats));
+	}
+}
+
+static void signal_handler(int sig){
+    if (sig == SIGINT){
+		const char *msg = "\nPing: interrupted by Ctrl+C\n";
+        write(STDERR_FILENO, msg, strlen(msg));
+		exit(EXIT_SUCCESS);
+	}
+}
+
+void init_signals(void)
+{
+	memset(&g_sigact, 0, sizeof(struct sigaction));
+	g_sigact.sa_handler = signal_handler; 
+	sigemptyset(&g_sigact.sa_mask);
+	g_sigact.sa_flags = 0;
+
+	if (sigaction(SIGINT, &g_sigact, NULL) < 0 ||
+        sigaction(SIGTERM, &g_sigact, NULL) < 0 ||
+        sigaction(SIGQUIT, &g_sigact, NULL) < 0) {
+        perror("Failed to set signal handlers");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void init_socket(t_ping *ping)
 {
-	ping->sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (!ping){
+		print_error("Ping structure is NULL.");
+		return ;
+	}
+
+	if (!ping->is_valid){
+		print_error("Ping structure is not valid.");
+		return ;
+	}
+	
+	ping->sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
 	if (ping->sockfd < 0)
 	{
 		print_error("Failed to create raw socket.");

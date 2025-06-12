@@ -10,7 +10,7 @@ NC     := \033[0m
 # Compiler & Flags
 ###############################################################################
 CC       = gcc
-CFLAGS   = -Wall -Wextra -Werror -O2 -MMD -MP
+CFLAGS   = -Wall -Wextra -Werror -O2 -MMD -MP -g #-fsanitize=address
 LDFLAGS  = -lm 
 # -MMD and -MP tell the compiler to generate .d (dependency) files for each .c
 
@@ -47,7 +47,6 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@echo "$(BLUE)Linking $(TARGET)...$(NC)"
 	@$(CC) $(CFLAGS) -I$(INC_DIR) -o $@ $(OBJS) $(LDFLAGS)
-	@sudo setcap cap_net_raw=ep $(TARGET)
 	@echo "$(GREEN)Build complete!$(NC)"
 
 ###############################################################################
@@ -98,6 +97,12 @@ help:
 ###############################################################################
 # Tests Rules
 ###############################################################################
+valgrind: $(TARGET)
+	@echo "$(BLUE)Running valgrind...$(NC)"
+	valgrind --leak-check=full \
+		--show-leak-kinds=all \
+		--track-origins=yes \
+		./$(TARGET) $(ARGS)
 
 ###############################################################################
 # Dependency Handling

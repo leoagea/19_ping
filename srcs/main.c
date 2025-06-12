@@ -6,26 +6,25 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/11 16:35:56 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 16:43:54 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/ping.h"
 
+t_data *g_data = NULL;
+struct sigaction g_sigact;
+
 static void ping_loop(t_data *data)
 {
+	// g_data = data;
+
 	size_t i = 0;
 	while (i < data->ping_size)
 	{
-		checkTarget(data, &data->ping[i], data->av[i + 1]);
-		if (!data->ping[i].is_valid)
-		{
-			i++;
-			continue;
-		}
-		init_socket(&data->ping[i]);
-		if (event_loop(&data->ping[i], &data->stats[i]) < 0)
-		{
+		checkTarget(&g_data->ping[i], g_data->av[i + 1]);
+		init_socket(&g_data->ping[i]);
+		if (event_loop(&g_data->ping[i], &g_data->stats[i]) < 0){
 			print_error("Event loop failed");
 		}
 		i++;
@@ -34,18 +33,20 @@ static void ping_loop(t_data *data)
 
 int main(int ac, char **av)
 {
-	t_data data;
+	// t_data data;
 	
 	if (ac < 2){
 		usage();
 		return 1;
 	}
-	data.ac = ac;
-	data.av = av;
-	init_data(&data);
-	ping_loop(&data);
-	debug_print_all_ping_struct(&data);
-	free_data(&data);
+	g_data = calloc(1, sizeof(t_data));
+	g_data->ac = ac;
+	g_data->av = av;
+	atexit(free_data);
+	init_data(g_data);
+	debug_print_all_ping_struct(g_data);
+	ping_loop(g_data);
+	// free_data(&data);
 	
 	return 0;
 }

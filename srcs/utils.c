@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 16:22:46 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/12 15:16:13 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,14 @@ static bool isValidIpAddress(const char *ipAddress)
 	return result != 0;
 }
 
-void checkTarget(t_data *data, t_ping *ping, const char *target)
+void checkTarget(t_ping *ping, const char *target)
 {
+	if (!ping || !target) {
+		print_error("Invalid ping or target.");
+		ping->is_valid = false;
+		return ;
+	}
+	
 	if (isValidIpAddress(target)){
 		ping->target_ip = inet_addr(target);
 		if (ping->target_ip == INADDR_NONE) {
@@ -47,7 +53,6 @@ void checkTarget(t_data *data, t_ping *ping, const char *target)
 	if (he == NULL){
 		ping->is_valid = false;
 		print_error("ping: unknown host");
-		free_data(data);
 		exit(EXIT_FAILURE); 
 	}
 	
