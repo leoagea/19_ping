@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 18:58:28 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/13 16:10:53 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ static int send_ping(t_ping *ping, t_ping_stats *stats)
 				perror("sendto failed");
 				return -1; // Indicate failure to send
 	}
+	printf("Packet sent to %s\n", ping->target_hostname ? ping->target_hostname : inet_ntoa(dest_addr.sin_addr));
 	return 0; // Placeholder for actual implementation
 }
 
@@ -35,7 +36,25 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 {
 	(void)stats; // stats is not used in this function, but could be used for logging or statistics
 	(void)ping; // ping is not used in this function, but could be used for receiving the ping
+	char buf[RECV_BUFFER_SIZE];
 
+	while (recv(ping->sockfd, buf, sizeof(buf), 0) < 0) {
+		if (errno == EINTR) {
+			// Interrupted by a signal, continue receiving
+			continue;
+		} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+			// No data available, return to the event loop
+			return 0; // No data received
+		} else {
+			perror("recv failed");
+			return -1; // Indicate failure to receive
+		}
+	}
+	if (check_response_header(buf, ping->ping_count - 1) == -1) {
+		fprintf(stderr, "Received invalid ICMP packet\n");
+		return -1; // Invalid packet received
+	}
+	rtt_calculate(stats, buf + sizeof(struct icmp));
 	// Implementation of receiving an ICMP Echo Reply
 	// This function should read the ICMP packet from the socket and process it
 	// For simplicity, we assume it returns 0 on success
@@ -127,7 +146,6 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 				perror("Failed to receive ping");
 				return -1;
 			}
-			stats->packets_received++;
 		}
 		
 		if (timeval_cmp(&now, &next_ping) >= 0) {
@@ -139,8 +157,12 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 				return -1;
 			}
 			stats->packets_sent++;
-			gettimeofday(&stats->next_ping_time, NULL);
+			gettimeofday(&now, NULL);
+			stats->last_ping_time = now; // Update last ping time
 			ping->ping_count++;
+			
+			next_ping = now;
+			next_ping.tv_sec += ping->ping_interval; // Schedule next ping
 		}
 	}
 	return 0;

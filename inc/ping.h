@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 18:39:32 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/13 15:50:37 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@
 
 #define PING_DEFAULT_COUNT 4
 #define MAX_PAYLOAD_SIZE 56
+#define RECV_BUFFER_SIZE 2048
 
 /*#############################################################################
 # Global Variables
@@ -49,19 +50,22 @@ extern struct sigaction g_sigact;
 #############################################################################*/
 
 void	init_data(t_data *data);
+void 	init_signals(void);
 void 	init_socket(t_ping *ping);
 
 /*#############################################################################
 # Event.c
 #############################################################################*/
 
-int event_loop(t_ping *ping, t_ping_stats *stats);
+int		event_loop(t_ping *ping, t_ping_stats *stats);
 
 /*#############################################################################
 # Request.c
 #############################################################################*/
 
-void build_echo_request(char *buf, size_t payload_len, int count);
+void	build_echo_request(char *buf, size_t payload_len, int count);
+int 	check_response_header(char *buf, int count);
+void	rtt_calculate(t_ping_stats *stats, char *buf);
 
 /*#############################################################################
 # Utils.c
