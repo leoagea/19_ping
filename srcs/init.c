@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:28:17 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/13 15:00:21 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/16 15:46:04 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ void init_data(t_data *data)
 		print_error("Memory allocation failed for ping structure.");
 		exit(EXIT_FAILURE);
 	}
+	
 	data->stats = calloc(data->ping_size + 1, sizeof(t_ping_stats));
 	if (!data->stats)
 	{
@@ -68,6 +69,14 @@ void init_socket(t_ping *ping)
 
 	if (!ping->is_valid){
 		print_error("Ping structure is not valid.");
+		return ;
+	}
+	
+	ping->rtt = calloc(PING_DEFAULT_COUNT, sizeof(double));
+	if (!ping->rtt)
+	{
+		print_error("Memory allocation failed for RTT array.");
+		ping->is_valid = false;
 		return ;
 	}
 	

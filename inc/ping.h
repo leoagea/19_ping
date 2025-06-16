@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/13 15:50:37 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/16 16:10:25 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 #include <unistd.h>  // close
 #include <poll.h>   // poll
 #include <time.h>   // time, time_t
+#include <math.h>
 #include <errno.h>   // errno, ENOPROTOOPT
 #include <arpa/inet.h> // inet_pton
 #include <netdb.h>    // gethostbyname
@@ -37,6 +38,8 @@
 #define PING_DEFAULT_COUNT 4
 #define MAX_PAYLOAD_SIZE 56
 #define RECV_BUFFER_SIZE 2048
+# define BSWAP16(x) \
+	((__uint16_t) ((((x) >> 8) & 0xff) | (((x) & 0xff) << 8)))
 
 /*#############################################################################
 # Global Variables
@@ -63,9 +66,24 @@ int		event_loop(t_ping *ping, t_ping_stats *stats);
 # Request.c
 #############################################################################*/
 
-void	build_echo_request(char *buf, size_t payload_len, int count);
+void	build_echo_request(char *buf, size_t payload_len);
 int 	check_response_header(char *buf, int count);
-void	rtt_calculate(t_ping_stats *stats, char *buf);
+
+/*#############################################################################
+# TimeCalc.c
+#############################################################################*/
+
+void	rtt_calculate(t_ping *ping, t_ping_stats *stats, char *buf);
+double	rtt_avg_calculate(t_ping *ping);
+double	stddev_calculate(t_ping *ping, double average);
+
+/*#############################################################################
+# Print.c
+#############################################################################*/
+
+void print_ping_info(t_ping *ping);
+void print_global_stats(t_ping *ping, t_ping_stats *stats);
+void print_ping_stats(t_ping *ping);
 
 /*#############################################################################
 # Utils.c
@@ -78,7 +96,6 @@ void	timeval_add(const struct timeval *a, const struct timeval *b, struct timeva
 void	timeval_sub(const struct timeval *a, const struct timeval *b, struct timeval *result);
 int 	timeval_cmp(const struct timeval *a, const struct timeval *b);
 uint16_t checksum(void *buf, size_t len);
-void 	print_result(t_ping *ping, t_ping_stats *stats);
 
 /*#############################################################################
 # Free.c

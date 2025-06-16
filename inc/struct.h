@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 18:36:03 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/16 16:02:28 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef struct s_ping
 	int		ping_count;
 	int		ping_interval;
 	int		ping_timeout;
+	double	*rtt;
 
 	bool	is_valid;
 	char 	*target_hostname;
@@ -39,7 +40,6 @@ typedef struct s_ping_stats
 	int		packets_lost;
 	double	min_rtt;
 	double	max_rtt;
-	double	avg_rtt;
 
 	t_timeval 	next_ping_time;
 	t_timeval	last_ping_time;

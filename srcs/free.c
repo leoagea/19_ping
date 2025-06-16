@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:33:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 16:45:23 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/16 18:44:00 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,12 @@ static void free_ping_struct(t_ping *ping, size_t size)
         if (ping[i].target_hostname)
         {
             freePointer((void **)&ping[i].target_hostname);
+            if (ping[i].rtt)
+            {
+                // fprintf(stderr, "Freeing RTT array for ping %zu\n", i);
+                free(ping[i].rtt);
+                ping[i].rtt = NULL;
+            }
             if (ping[i].sockfd >= 0)
             {
                 close(ping[i].sockfd);

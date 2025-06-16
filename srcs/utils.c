@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/12 18:39:17 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/16 15:44:13 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,21 +134,4 @@ uint16_t checksum(void *buf, size_t len)
 
     // One's-complement and return
     return (uint16_t)~sum;
-}
-
-void print_result(t_ping *ping, t_ping_stats *stats)
-{
-	if (!ping || !stats) {
-		print_error("Invalid ping or stats structure.");
-		return;
-	}
-
-	printf("%d packets transmitted, %d received, %.1f%% packet loss\n",
-		   stats->packets_sent, stats->packets_received,
-		   (double)stats->packets_lost / stats->packets_sent * 100.0);
-
-	if (stats->packets_received > 0) {
-		printf("round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
-			   stats->min_rtt, stats->avg_rtt, stats->max_rtt, 0.0);
-	}
 }

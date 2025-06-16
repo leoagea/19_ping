@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/13 16:10:53 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/16 16:18:38 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,14 +21,14 @@ static int send_ping(t_ping *ping, t_ping_stats *stats)
         .sin_addr.s_addr = ping->target_ip
     };
 	
-	build_echo_request(&buf[0], MAX_PAYLOAD_SIZE, ping->ping_count);
+	build_echo_request(&buf[0], MAX_PAYLOAD_SIZE);
 	
 	if (sendto(ping->sockfd, buf, sizeof(struct icmp) + MAX_PAYLOAD_SIZE, 0,
 			(struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0) {
 				perror("sendto failed");
 				return -1; // Indicate failure to send
 	}
-	printf("Packet sent to %s\n", ping->target_hostname ? ping->target_hostname : inet_ntoa(dest_addr.sin_addr));
+	// printf("Packet sent to %s\n", ping->target_hostname ? ping->target_hostname : inet_ntoa(dest_addr.sin_addr));
 	return 0; // Placeholder for actual implementation
 }
 
@@ -54,7 +54,11 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 		fprintf(stderr, "Received invalid ICMP packet\n");
 		return -1; // Invalid packet received
 	}
-	rtt_calculate(stats, buf + sizeof(struct icmp));
+	
+	rtt_calculate(ping, stats, buf + sizeof(struct icmp));
+
+	print_ping_stats(ping); // Print the ping statistics after receiving a valid packet
+	
 	// Implementation of receiving an ICMP Echo Reply
 	// This function should read the ICMP packet from the socket and process it
 	// For simplicity, we assume it returns 0 on success
@@ -97,7 +101,9 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 	ping->nfds = ping->sockfd + 1;
 	gettimeofday(&stats->last_ping_time, NULL);
 
-	while (ping->ping_count < PING_DEFAULT_COUNT){
+	print_ping_info(ping);
+	
+	while (stats->packets_lost + stats->packets_received < PING_DEFAULT_COUNT){
 		
 		FD_ZERO(&read_fds);
 		FD_SET(ping->sockfd, &read_fds);
@@ -165,5 +171,7 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 			next_ping.tv_sec += ping->ping_interval; // Schedule next ping
 		}
 	}
+	print_global_stats(ping, stats);
+
 	return 0;
 }
