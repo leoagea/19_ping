@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:05:42 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 15:21:30 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ struct sigaction g_sigact;
 
 static void ping_loop(t_data *data)
 {
-	// g_data = data;
-
 	size_t i = 0;
 	while (i < data->ping_size)
 	{
@@ -28,6 +26,7 @@ static void ping_loop(t_data *data)
 		if (event_loop(&g_data->ping[i], &g_data->stats[i]) < 0){
 			print_error("Event loop failed");
 		}
+		g_data->ping_count++;
 		i++;
 	}
 }

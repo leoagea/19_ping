@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 16:02:28 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 15:21:03 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ typedef struct s_data
 	t_ping			*ping;
 	t_ping_stats	*stats;
 	size_t			ping_size;
+	size_t			ping_count;
 }	t_data;
 
 #endif

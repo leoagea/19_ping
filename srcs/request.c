@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:05:31 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 15:14:52 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,8 @@ static void build_payload(char *payload, int payload_len)
  * - Sequence Number: 0 (can be set to a unique value) 2 bytes
  * - Payload: optional data (can be filled with any data, e.g., timestamp)
  */
-void build_echo_request(char *buf, size_t payload_len)
+void build_echo_request(char *buf, size_t payload_len, int count)
 {
-    static int count = 0;
     struct icmp *icmph = (struct icmp*)buf;
 
     memset(buf, 0, sizeof(*icmph) + payload_len);

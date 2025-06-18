@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:28:17 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/17 17:49:49 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 15:23:13 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 void init_data(t_data *data)
 {
+	data->ping_count = 0;
 	data->ping_size = data->ac - 1;
 	data->ping = calloc(data->ping_size + 1, sizeof(t_ping));
 	if (!data->ping)
@@ -39,8 +40,9 @@ void init_data(t_data *data)
 
 static void signal_handler(int sig){
     if (sig == SIGINT){
-		const char *msg = "\nPing: interrupted by Ctrl+C\n";
-        write(STDERR_FILENO, msg, strlen(msg));
+		t_ping *ping = &g_data->ping[g_data->ping_count];
+		t_ping_stats *stats = &g_data->stats[g_data->ping_count];
+		print_global_stats(ping, stats);
 		exit(EXIT_SUCCESS);
 	}
 }
@@ -89,7 +91,7 @@ void init_socket(t_ping *ping)
 	}
 	ping->ping_count = 0;
 	ping->ping_interval = 1;
-	ping->ping_timeout = 5;
+	ping->ping_timeout = 2;
 
 	int status;
 
