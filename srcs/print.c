@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 16:10:09 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 15:07:05 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,11 @@ void print_global_stats(t_ping *ping, t_ping_stats *stats)
 		stats->packets_sent, stats->packets_received,
 		(double)stats->packets_lost / stats->packets_sent * 100.0);
 	
-	double avg_rtt = rtt_avg_calculate(ping) * 1000;
-	double stddev_rtt = stddev_calculate(ping, avg_rtt / 1000);
+	double avg_rtt = rtt_avg_calculate(ping);
+	double stddev_rtt = stddev_calculate(ping, avg_rtt);
 	if (stats->packets_received > 0) {
 		fprintf(stdout, "round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
-			stats->min_rtt * 1000, avg_rtt, stats->max_rtt * 1000, stddev_rtt);
+			stats->min_rtt, avg_rtt, stats->max_rtt, stddev_rtt);
 	}
 }
 
@@ -41,5 +41,5 @@ void print_ping_stats(t_ping *ping)
 {
 	fprintf(stdout, "64 bytes from %s: icmp_seq=%d ttl=64 time=%.3f ms\n",
 		inet_ntoa(*(struct in_addr *)&ping->target_ip),
-		ping->ping_count - 1, ping->rtt[ping->ping_count - 1] * 1000);
+		ping->ping_count - 1, ping->rtt[ping->ping_count - 1]);
 }

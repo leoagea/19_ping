@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 15:50:04 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 15:05:31 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,16 +24,11 @@ static void build_payload(char *payload, int payload_len)
 {
     struct timeval send_ts;
 
-    // 1) Grab the current time
     gettimeofday(&send_ts, NULL);
 
-    // 2) Copy the struct timeval into the start of the payload
     memcpy(payload, &send_ts, sizeof(send_ts));
 
-    // 3) Pad the remainder with 0xAA
-    for (int i = sizeof(send_ts); i < payload_len; i++) {
-        payload[i] = 0xAA;
-    }
+    memset(payload + sizeof(send_ts), 0xAA, payload_len - sizeof(send_ts));
 }
 
 /*
@@ -51,70 +46,44 @@ void build_echo_request(char *buf, size_t payload_len)
     static int count = 0;
     struct icmp *icmph = (struct icmp*)buf;
 
-    // 1. Zero everything out (so checksum starts as 0)
     memset(buf, 0, sizeof(*icmph) + payload_len);
 
-    // 2. Fill fixed fields
-    icmph->icmp_type           = ICMP_ECHO;     // Type 8 = Echo Request
-    icmph->icmp_code           = 0;              // Code 0
-    icmph->icmp_cksum          = 0;              // checksum = 0 for now
+    icmph->icmp_type = ICMP_ECHO;
+    icmph->icmp_code = 0;
+    icmph->icmp_cksum = 0;
 
-    // 3. Put your PID into the identifier field
-    uint16_t pid = (uint16_t)getpid();
-    // printf("PID: %d\n", pid);
-
-    // icmph->icmp_id = htons(pid & 0xFFFF);
-    icmph->icmp_id = htons(pid & 0xFFFF);
+    icmph->icmp_id = htons((uint16_t)getpid() & 0xFFFF);
     icmph->icmp_seq = htons(count++ & 0xFFFF);
 
-	// Build the timestamped payload
-	build_payload(buf + sizeof(struct icmp), payload_len);
+    char *payload = (char *)buf + sizeof(struct icmp);
+	build_payload(payload, payload_len);
 
-    // 5. Compute and insert checksum over the whole ICMP packet
     size_t icmp_len = sizeof(*icmph) + payload_len;
-    icmph->icmp_cksum = htons(checksum(buf, icmp_len));
+    icmph->icmp_cksum = checksum(buf, icmp_len);
 }
 
 int check_response_header(char *buf, int count)
 {
-    // struct icmp *icmph = (struct icmp*)buf;
-    struct iphdr  *ip  = (struct iphdr *)buf;
-    size_t iphl = ip->ihl * 4; 
-    struct icmp *icmph = (void *)(buf + iphl);
+    struct icmp *icmph = (struct icmp *)buf;
 
-    // uint16_t id_net = icmph->icmp_id;          /* value as it came off wire   */
-    // uint16_t id_host = ntohs(id_net);          /* convert exactly **once**    */
-    // printf("wire=0x%04x  host=%u\n", id_net, id_host);
-    
-    // Check if the type is ICMP_ECHOREPLY (0)
     if (icmph->icmp_type != ICMP_ECHOREPLY) {
         fprintf(stderr, "Received non-echo reply packet: type %d\n", icmph->icmp_type);
-        return -1; // Not an Echo Reply
+        return -1;
     }
 
-    // Check if the code is 0
     if (icmph->icmp_code != 0) {
         fprintf(stderr, "Received packet with non-zero code: %d\n", icmph->icmp_code);
-        return -1; // Non-zero code
+        return -1;
     }
 
-    // printf("sentID=%u recvID=%u\n",
-    //    (unsigned)(getpid() & 0xFFFF),
-    //    (unsigned)id);
-    // uint16_t id = icmph->icmp_id;
-    // printf("ICMP ID: %d\n", ntohs(id));
-    // uint16_t want = (uint16_t)getpid() & 0xFFFF;
-    // printf("wantID=  %d\n", ntohs(want));
-    // printf("id: %04x\n", id);
-    // printf("want: %04x\n", want);
-    // if (id != want) {
-    //     fprintf(stderr, "Received packet with mismatched identifier: %d\n", ntohs(icmph->icmp_id));
-    //     return -1; // Identifier does not match
-    // }
+    if (icmph->icmp_id != htons(getpid() & 0xFFFF)) {
+        fprintf(stderr, "Received packet with invalid identifier: %d\n", ntohs(icmph->icmp_id));
+        return -1;
+    }
     
     if (ntohs(icmph->icmp_seq) != count) {
         fprintf(stderr, "Received packet with invalid sequence number: %d\n", ntohs(icmph->icmp_seq));
-        return -1; // Invalid sequence number
+        return -1;
     }
-    return 0; // Valid Echo Reply
+    return 0;
 }

@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:49:54 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 16:18:07 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 15:06:26 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,34 +15,27 @@
 void rtt_calculate(t_ping *ping, t_ping_stats *stats, char *buf)
 {
     struct timeval send_ts;
-    struct timeval recv_ts;
+    struct timeval now;
     struct timeval result;
     
     double rtt;
 
-    // Extract the send timestamp from the payload
     memcpy(&send_ts, buf, sizeof(send_ts));
 
-    // Get the current time as the receive timestamp
-    gettimeofday(&recv_ts, NULL);
+    gettimeofday(&now, NULL);
 
-    // Calculate RTT in seconds
-    timeval_sub(&recv_ts, &send_ts, &result);
-    rtt =  (result.tv_sec + result.tv_usec) / 1000000.0;
-
-    stats->packets_received++;
+    timeval_sub(&now, &send_ts, &result);
+    rtt =  result.tv_sec * 1000.0 + result.tv_usec / 1000.0;
     
-    if (stats->packets_received == 1 || rtt < stats->min_rtt) {
+    if (stats->packets_received == 0) {
         stats->min_rtt = rtt;
-    }
-    
-    if (rtt > stats->max_rtt) {
         stats->max_rtt = rtt;
+    }else {
+        stats->min_rtt = fmin(stats->min_rtt, rtt);
+        stats->max_rtt = fmax(stats->max_rtt, rtt);
     }
 
     ping->rtt[ping->ping_count - 1] = rtt; 
-
-    // printf("RTT: %.3f ms\n", rtt * 1000);
 }
 
 double rtt_avg_calculate(t_ping *ping)
@@ -69,5 +62,5 @@ double stddev_calculate(t_ping *ping, double average)
         }
     }
 
-    return (ping->ping_count > 1) ? sqrt(sum / (PING_DEFAULT_COUNT)) * 1000 : 0.0;
+    return (ping->ping_count > 1) ? sqrt(sum / (PING_DEFAULT_COUNT)) : 0.0;
 }

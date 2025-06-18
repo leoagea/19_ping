@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:28:17 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 15:46:04 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/17 17:49:49 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ void init_socket(t_ping *ping)
 		return ;
 	}
 	
-	ping->sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
+	ping->sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (ping->sockfd < 0)
 	{
 		print_error("Failed to create socket.");

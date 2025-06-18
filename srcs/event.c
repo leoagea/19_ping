@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 16:18:38 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 14:28:14 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,34 +34,29 @@ static int send_ping(t_ping *ping, t_ping_stats *stats)
 
 static int receive_ping(t_ping *ping, t_ping_stats *stats)
 {
-	(void)stats; // stats is not used in this function, but could be used for logging or statistics
-	(void)ping; // ping is not used in this function, but could be used for receiving the ping
 	char buf[RECV_BUFFER_SIZE];
+	struct sockaddr_in addr;
+	socklen_t addr_len = sizeof(addr);
 
-	while (recv(ping->sockfd, buf, sizeof(buf), 0) < 0) {
-		if (errno == EINTR) {
-			// Interrupted by a signal, continue receiving
-			continue;
-		} else if (errno == EAGAIN || errno == EWOULDBLOCK) {
-			// No data available, return to the event loop
-			return 0; // No data received
-		} else {
-			perror("recv failed");
-			return -1; // Indicate failure to receive
-		}
+	ssize_t bytes = recvfrom(ping->sockfd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &addr_len);
+	if (bytes < 0) {
+		perror("recvfrom failed");
+		return -1; // Indicate failure to receive
 	}
-	if (check_response_header(buf, ping->ping_count - 1) == -1) {
+	
+	struct iphdr  *ip  = (struct iphdr *)buf;
+    size_t iphl = ip->ihl * 4; 
+	
+	if (check_response_header(buf + iphl, ping->ping_count - 1) == -1) {
 		fprintf(stderr, "Received invalid ICMP packet\n");
 		return -1; // Invalid packet received
 	}
 	
-	rtt_calculate(ping, stats, buf + sizeof(struct icmp));
+	rtt_calculate(ping, stats, buf + iphl + sizeof(struct icmp));
 
-	print_ping_stats(ping); // Print the ping statistics after receiving a valid packet
+	print_ping_stats(ping);
 	
-	// Implementation of receiving an ICMP Echo Reply
-	// This function should read the ICMP packet from the socket and process it
-	// For simplicity, we assume it returns 0 on success
+	stats->packets_received++;
 	return 0; // Placeholder for actual implementation
 }
 
