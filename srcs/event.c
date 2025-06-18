@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:16:15 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 18:51:33 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,19 +44,20 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 		return -1;
 	}
 	
-	struct iphdr  *ip  = (struct iphdr *)buf;
-    size_t iphl = ip->ihl * 4; 
-	
-	if (check_response_header(buf + iphl, ping->ping_count - 1) == -1) {
-		fprintf(stderr, "Received invalid ICMP packet\n");
-		return -1;
+	size_t ip_hl = ((struct iphdr *)buf)->ihl * 4;
+    struct icmphdr *ih = (void *)(buf + ip_hl);
+
+	if (ih->type == ICMP_ECHOREPLY)
+		handle_echo_reply(ping, stats, buf);
+	else if (ih->type == ICMP_DEST_UNREACH){
+		fprintf(stderr, "Destination unreachable: %s\n", inet_ntoa(addr.sin_addr));
+		stats->packets_lost++;
+	}
+	else{
+		fprintf(stderr, "Received unexpected ICMP type: %d\n", ih->type);
+		stats->packets_lost++;
 	}
 	
-	rtt_calculate(ping, stats, buf + iphl + sizeof(struct icmp));
-
-	print_ping_stats(ping);
-	
-	stats->packets_received++;
 	return 0;
 }
 

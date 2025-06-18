@@ -10,3 +10,6 @@ To make it permanent(not recommended):
 To test and see the ICMP packets:
 	sudo tcpdump -nn -vvv -s 0 icmp and dst host 8.8.8.8
 	./ft_ping 8.8.8.8
+
+To get all symbols from libc:
+	nm /usr/lib/x86_64-linux-gnu/libc.a | grep ' T ' > libc.txt

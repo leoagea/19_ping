@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:14:52 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 18:50:05 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ void build_echo_request(char *buf, size_t payload_len, int count)
     icmph->icmp_cksum = checksum(buf, icmp_len);
 }
 
-int check_response_header(char *buf, int count)
+static int check_response_header(char *buf, int count)
 {
     struct icmp *icmph = (struct icmp *)buf;
 
@@ -84,5 +84,23 @@ int check_response_header(char *buf, int count)
         fprintf(stderr, "Received packet with invalid sequence number: %d\n", ntohs(icmph->icmp_seq));
         return -1;
     }
+    return 0;
+}
+
+int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
+{
+    struct iphdr  *ip  = (struct iphdr *)buf;
+    size_t iphl = ip->ihl * 4; 
+	
+	if (check_response_header(buf + iphl, ping->ping_count - 1) == -1) {
+		fprintf(stderr, "Received invalid ICMP packet\n");
+		return -1;
+	}
+	
+	rtt_calculate(ping, stats, buf + iphl + sizeof(struct icmp));
+
+	print_ping_stats(ping);
+	
+	stats->packets_received++;
     return 0;
 }

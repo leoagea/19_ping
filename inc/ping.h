@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 16:37:13 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 18:50:24 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ int		event_loop(t_ping *ping, t_ping_stats *stats);
 #############################################################################*/
 
 void	build_echo_request(char *buf, size_t payload_len, int count);
-int 	check_response_header(char *buf, int count);
+int 	handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf);
 
 /*#############################################################################
 # TimeCalc.c

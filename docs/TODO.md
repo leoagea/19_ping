@@ -7,3 +7,5 @@ Leaks:
 	still reachable when using CTRL+C
 
 Identifier problem on receive packets
+
+Inf % packets lost when all packets are lost
