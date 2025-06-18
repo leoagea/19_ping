@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:21:03 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 16:29:31 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,14 @@
 
 typedef struct timeval t_timeval;
 
-typedef struct s_ping
-{
+typedef struct s_options {
+    bool      help;          // true if -h or --help was passed
+    bool      verbose;       // true if -v or --verbose
+    char    **inputs;        // remaining positional arguments
+    int       n_inputs;      // count of inputs
+} t_options;
+
+typedef struct s_ping {
 	int		sockfd;
 	int  	nfds;
 	int		ping_count;
@@ -33,8 +39,7 @@ typedef struct s_ping
 	in_addr_t	target_ip;
 }	t_ping;
 
-typedef struct s_ping_stats
-{
+typedef struct s_ping_stats {
 	int		packets_sent;
 	int		packets_received;
 	int		packets_lost;
@@ -45,14 +50,14 @@ typedef struct s_ping_stats
 	t_timeval	last_ping_time;
 }	t_ping_stats;
 
-typedef struct s_data
-{
+typedef struct s_data {
 	int				ac;
 	char			**av;
 	
+	t_options  		*arg;
 	t_ping			*ping;
 	t_ping_stats	*stats;
-	size_t			ping_size;
+	size_t			ping_nb;
 	size_t			ping_count;
 }	t_data;
 

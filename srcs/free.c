@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:33:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 18:44:00 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 18:31:19 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,19 +31,12 @@ static void free_ping_struct(t_ping *ping, size_t size)
     while (i < size)
     {
         if (ping[i].target_hostname)
-        {
             freePointer((void **)&ping[i].target_hostname);
-            if (ping[i].rtt)
-            {
-                // fprintf(stderr, "Freeing RTT array for ping %zu\n", i);
-                free(ping[i].rtt);
-                ping[i].rtt = NULL;
-            }
-            if (ping[i].sockfd >= 0)
-            {
-                close(ping[i].sockfd);
-                ping[i].sockfd = -1;
-            }
+        if (ping[i].rtt)
+            freePointer((void **)&ping[i].rtt);
+        if (ping[i].sockfd >= 0){
+            close(ping[i].sockfd);
+            ping[i].sockfd = -1;
         }
         i++;
     }
@@ -56,8 +49,10 @@ void free_data(void)
         return;
 
     if (g_data->ping)
-        free_ping_struct(g_data->ping, g_data->ping_size);
+        free_ping_struct(g_data->ping, g_data->ping_nb);
     if (g_data->stats)
         freePointer((void **)&g_data->stats);
+    if (g_data->arg)
+        freePointer((void **)&g_data->arg);
     freePointer((void **)&g_data);
 }

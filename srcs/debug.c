@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 15:43:34 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/03 15:47:37 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 16:29:56 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void debug_print_all_ping_struct(t_data *data)
 		return;
 	}
 
-	for (i = 0; i < data->ping_size; i++)
+	for (i = 0; i < data->ping_nb; i++)
 	{
 		printf("Ping %zu:\n", i + 1);
 		printf("  Target Hostname: %s\n", data->ping[i].target_hostname ? data->ping[i].target_hostname : "N/A");

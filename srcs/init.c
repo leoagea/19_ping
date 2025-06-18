@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:28:17 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:23:13 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 16:32:40 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,14 @@
 void init_data(t_data *data)
 {
 	data->ping_count = 0;
-	data->ping_size = data->ac - 1;
-	data->ping = calloc(data->ping_size + 1, sizeof(t_ping));
+	data->ping = calloc(data->ping_nb + 1, sizeof(t_ping));
 	if (!data->ping)
 	{
 		print_error("Memory allocation failed for ping structure.");
 		exit(EXIT_FAILURE);
 	}
 	
-	data->stats = calloc(data->ping_size + 1, sizeof(t_ping_stats));
+	data->stats = calloc(data->ping_nb + 1, sizeof(t_ping_stats));
 	if (!data->stats)
 	{
 		free(data->ping);
@@ -31,20 +30,19 @@ void init_data(t_data *data)
 		exit(EXIT_FAILURE);
 	}
 
-	for (size_t i = 0; i < data->ping_size; i++)
+	for (size_t i = 0; i < data->ping_nb; i++)
 	{
 		memset(&data->ping[i], 0, sizeof(t_ping));
 		memset(&data->stats[i], 0, sizeof(t_ping_stats));
 	}
 }
 
-static void signal_handler(int sig){
-    if (sig == SIGINT){
-		t_ping *ping = &g_data->ping[g_data->ping_count];
-		t_ping_stats *stats = &g_data->stats[g_data->ping_count];
-		print_global_stats(ping, stats);
-		exit(EXIT_SUCCESS);
-	}
+void init_options(t_options *options)
+{
+	if (!options)
+		return;
+
+	memset(options, 0, sizeof(t_options));
 }
 
 void init_signals(void)

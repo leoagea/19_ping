@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/16 15:44:13 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 16:35:23 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,4 +134,22 @@ uint16_t checksum(void *buf, size_t len)
 
     // One's-complement and return
     return (uint16_t)~sum;
+}
+
+void signal_handler(int sig)
+{
+    if (sig == SIGINT){
+		t_ping *ping = &g_data->ping[g_data->ping_count];
+		t_ping_stats *stats = &g_data->stats[g_data->ping_count];
+		print_global_stats(ping, stats);
+		exit(EXIT_SUCCESS);
+	}
+}
+
+void help(void)
+{
+    fprintf(stdout, "Usage: ping [options] <host>\n");
+    fprintf(stdout, "Options:\n");
+    fprintf(stdout, "  -h, --help        Show this help message and exit\n");
+    fprintf(stdout, "  -v, --verbose     Enable verbose output\n");
 }

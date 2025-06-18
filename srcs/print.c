@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:07:05 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 18:40:27 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,24 @@
 
 void print_ping_info(t_ping *ping)
 {
-	fprintf(stdout ,"PING %s (%s): 56 data types\n",
+	char *buf = calloc(256, sizeof(char));
+	if  (!buf) {
+		print_error("Memory allocation failed for ping info buffer.");
+		return;
+	}
+	
+	int len = snprintf(buf, 256, "PING %s (%s): 56 data types",
 		ping->target_hostname ? ping->target_hostname : inet_ntoa(*(struct in_addr *)&ping->target_ip),
 		inet_ntoa(*(struct in_addr *)&ping->target_ip));
+		
+	if (g_data->arg->verbose){
+		size_t pid = getpid();
+		len += snprintf(buf + len, 256 - len, ", id 0x%lX = %d", pid, (int)pid);
+	}
+	snprintf(buf + len, 2, "\n");
+	fprintf(stdout, "%s", buf);
+
+	free(buf);
 }
 
 void print_global_stats(t_ping *ping, t_ping_stats *stats)

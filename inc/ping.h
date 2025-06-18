@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 15:21:13 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/18 16:37:13 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@
 #include <sys/time.h> // struct timeval
 #include <sys/socket.h> // socket, setsockopt
 #include <netinet/ip_icmp.h> // ICMP protocol definitions
+#include <getopt.h>  // getopt_long
 
 #define PING_DEFAULT_COUNT 4
 #define MAX_PAYLOAD_SIZE 56
@@ -51,8 +52,15 @@ extern struct sigaction g_sigact;
 #############################################################################*/
 
 void	init_data(t_data *data);
+void	init_options(t_options *options);
 void 	init_signals(void);
 void 	init_socket(t_ping *ping);
+
+/*#############################################################################
+# Option.c
+#############################################################################*/
+
+void parse_arg(t_data *data);
 
 /*#############################################################################
 # Event.c
@@ -94,6 +102,8 @@ void	timeval_add(const struct timeval *a, const struct timeval *b, struct timeva
 void	timeval_sub(const struct timeval *a, const struct timeval *b, struct timeval *result);
 int 	timeval_cmp(const struct timeval *a, const struct timeval *b);
 uint16_t checksum(void *buf, size_t len);
+void signal_handler(int signum);
+void help(void);
 
 /*#############################################################################
 # Free.c
