@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 18:51:33 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 13:36:39 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 		fprintf(stderr, "Destination unreachable: %s\n", inet_ntoa(addr.sin_addr));
 		stats->packets_lost++;
 	}
-	else{
+	else if (ih->type != ICMP_ECHO){
 		fprintf(stderr, "Received unexpected ICMP type: %d\n", ih->type);
 		stats->packets_lost++;
 	}

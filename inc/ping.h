@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 18:50:24 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 13:38:46 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ double	stddev_calculate(t_ping *ping, double average);
 
 void print_ping_info(t_ping *ping);
 void print_global_stats(t_ping *ping, t_ping_stats *stats);
-void print_ping_stats(t_ping *ping);
+void print_ping_stats(t_ping *ping, int ttl);
 
 /*#############################################################################
 # Utils.c

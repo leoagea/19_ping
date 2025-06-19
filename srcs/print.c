@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 18:40:27 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 13:38:22 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void print_ping_info(t_ping *ping)
 		return;
 	}
 	
-	int len = snprintf(buf, 256, "PING %s (%s): 56 data types",
+	int len = snprintf(buf, 256, "PING %s (%s): 56 data bytes",
 		ping->target_hostname ? ping->target_hostname : inet_ntoa(*(struct in_addr *)&ping->target_ip),
 		inet_ntoa(*(struct in_addr *)&ping->target_ip));
 		
@@ -52,9 +52,9 @@ void print_global_stats(t_ping *ping, t_ping_stats *stats)
 }
 
 
-void print_ping_stats(t_ping *ping)
+void print_ping_stats(t_ping *ping, int ttl)
 {
-	fprintf(stdout, "64 bytes from %s: icmp_seq=%d ttl=64 time=%.3f ms\n",
+	fprintf(stdout, "64 bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n",
 		inet_ntoa(*(struct in_addr *)&ping->target_ip),
-		ping->ping_count - 1, ping->rtt[ping->ping_count - 1]);
+		ping->ping_count - 1, ttl, ping->rtt[ping->ping_count - 1]);
 }

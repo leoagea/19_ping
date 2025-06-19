@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 18:50:05 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 13:38:36 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,7 +99,8 @@ int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
 	
 	rtt_calculate(ping, stats, buf + iphl + sizeof(struct icmp));
 
-	print_ping_stats(ping);
+    int ttl =  ip->ttl;
+	print_ping_stats(ping, ttl);
 	
 	stats->packets_received++;
     return 0;
