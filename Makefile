@@ -104,6 +104,18 @@ valgrind: $(TARGET)
 		--track-origins=yes \
 		./$(TARGET) $(ARGS)
 
+TEST_DIR = tests
+TEST_SCRIPTS =  $(TEST_DIR)/test_invalid.sh \
+				$(TEST_DIR)/test_options.sh
+
+test: $(TARGET)
+	@chmod +x tests/*.sh
+	@echo "$(BLUE)Running tests...$(NC)"
+	@for script in $(TEST_SCRIPTS); do \
+		bash $$script || exit 1; \
+	done
+	@echo "$(GREEN)All tests passed!$(NC)"
+
 ###############################################################################
 # Dependency Handling
 ###############################################################################
