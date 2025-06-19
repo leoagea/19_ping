@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 16:04:42 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 18:31:57 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 19:04:04 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void parse_arg(t_data *data)
 	t_options *opt = calloc(1, sizeof(t_options));
 	init_options(opt);
 
-	const char *short_opts = "h?v";
+	const char *short_opts = "hv";
 	const struct option long_opts[] = {
 		{ "help",    no_argument,       NULL, 'h' },
 		{ "verbose", no_argument,       NULL, 'v' },
@@ -34,9 +34,8 @@ void parse_arg(t_data *data)
 				opt->verbose = true;
 				break;
 			case '?':
-				exit(EXIT_FAILURE);
 			default:
-				print_error("ping: unexpected error in option parsing");
+				_(STDERR_FILENO, "Try 'ping --help' for more information.\n");
 				exit(EXIT_FAILURE);
 		}
 	}
