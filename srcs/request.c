@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 18:34:24 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 18:41:09 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,48 +43,48 @@ static void build_payload(char *payload, int payload_len)
  */
 void build_echo_request(char *buf, size_t payload_len, int count)
 {
-    struct icmp *icmph = (struct icmp*)buf;
+    struct icmphdr *icmph = (struct icmphdr*)buf;
 
     memset(buf, 0, sizeof(*icmph) + payload_len);
 
-    icmph->icmp_type = ICMP_ECHO;
-    icmph->icmp_code = 0;
-    icmph->icmp_cksum = 0;
+    icmph->type = ICMP_ECHO;
+    icmph->code = 0;
+    icmph->checksum = 0;
 
-    icmph->icmp_id = htons((uint16_t)getpid() & 0xFFFF);
-    icmph->icmp_seq = htons(count++ & 0xFFFF);
+    icmph->un.echo.id = htons((uint16_t)getpid() & 0xFFFF);
+    icmph->un.echo.sequence = htons(count++ & 0xFFFF);
 
-    char *payload = (char *)buf + sizeof(struct icmp);
+    char *payload = (char *)buf + ICMP_HEADER_SIZE;
 	build_payload(payload, payload_len);
 
     size_t icmp_len = sizeof(*icmph) + payload_len;
     // printf("ICMP size: %zu bytes\n", sizeof(*icmph));
     // printf("Payload size: %zu bytes\n", payload_len);
     // printf("ICMP packet size: %zu bytes\n", icmp_len);
-    icmph->icmp_cksum = checksum(buf, icmp_len);
+    icmph->checksum = checksum(buf, icmp_len);
 }
 
 static int check_response_header(char *buf, int count)
 {
-    struct icmp *icmph = (struct icmp *)buf;
+    struct icmphdr *icmph = (struct icmphdr *)buf;
 
-    if (icmph->icmp_type != ICMP_ECHOREPLY) {
-        fprintf(stderr, "Received non-echo reply packet: type %d\n", icmph->icmp_type);
+    if (icmph->type != ICMP_ECHOREPLY) {
+        fprintf(stderr, "Received non-echo reply packet: type %d\n", icmph->type);
         return -1;
     }
 
-    if (icmph->icmp_code != 0) {
-        fprintf(stderr, "Received packet with non-zero code: %d\n", icmph->icmp_code);
+    if (icmph->code != 0) {
+        fprintf(stderr, "Received packet with non-zero code: %d\n", icmph->code);
         return -1;
     }
 
-    if (icmph->icmp_id != htons(getpid() & 0xFFFF)) {
-        fprintf(stderr, "Received packet with invalid identifier: %d\n", ntohs(icmph->icmp_id));
+    if (icmph->un.echo.id != htons(getpid() & 0xFFFF)) {
+        fprintf(stderr, "Received packet with invalid identifier: %d\n", ntohs(icmph->un.echo.id));
         return -1;
     }
     
-    if (ntohs(icmph->icmp_seq) != count) {
-        fprintf(stderr, "Received packet with invalid sequence number: %d\n", ntohs(icmph->icmp_seq));
+    if (ntohs(icmph->un.echo.sequence) != count) {
+        fprintf(stderr, "Received packet with invalid sequence number: %d\n", ntohs(icmph->un.echo.sequence));
         return -1;
     }
     return 0;
@@ -100,7 +100,7 @@ int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
 		return -1;
 	}
 	
-	rtt_calculate(ping, stats, buf + iphl + sizeof(struct icmp));
+	rtt_calculate(ping, stats, buf + iphl + ICMP_HEADER_SIZE);
 
     int ttl =  ip->ttl;
 	print_ping_stats(ping, ttl);

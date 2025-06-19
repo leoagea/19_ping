@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/19 16:26:50 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 18:29:58 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 18:41:33 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,11 +76,11 @@ void fill_IP_header(t_iphdr *ip_hdr, char *buf, size_t *len)
 
 
     *len += snprintf(buf + *len, sizeof(buf) - *len, "Vr HL TOS  Len   ID Flg  off TTL Pro  cks       Src       Dst     Data\n");
-    *len += snprintf(buf + *len, sizeof(buf) - *len, " %1x  %1x  %02x %04lx %04x   %1x %04x  %02x  %02x %04x %s  %s\n",
+    *len += snprintf(buf + *len, sizeof(buf) - *len, " %1x  %1x  %02x %04x %04x   %1x %04x  %02x  %02x %04x %s  %s\n",
            ip_hdr->version,
            ip_hdr->ihl,
            ip_hdr->tos,
-           totlen - sizeof(struct iphdr),
+           totlen,
            ident,
            flags,
            offset,
