@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 13:38:22 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 18:04:14 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,29 @@ void print_global_stats(t_ping *ping, t_ping_stats *stats)
 
 void print_ping_stats(t_ping *ping, int ttl)
 {
-	fprintf(stdout, "64 bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n",
+	fprintf(stdout, "%zu bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n",
+		ping->packet.bytes_read - ping->packet.iph_len, 
 		inet_ntoa(*(struct in_addr *)&ping->target_ip),
 		ping->ping_count - 1, ttl, ping->rtt[ping->ping_count - 1]);
+}
+
+void print_ttl_exceeded(t_ping *ping, char *ip_add)
+{
+	char buf[2048];
+	size_t len = 0;
+	
+	size_t bytes_len = ping->packet.bytes_read - 2 * ping->packet.iph_len;
+	len = snprintf(buf, sizeof(buf), "%ld bytes from %s: Time to live exceeded\n", bytes_len, ip_add);
+	
+	if (g_data->arg->verbose){
+		t_iphdr *ip_outer = get_outer_ip_header(ping->packet.recv_buffer);
+		t_icmphdr *icmp_outer = get_outer_icmp_header(ping->packet.recv_buffer);
+		t_icmphdr *icmp_inner = get_inner_icmp_header(ping->packet.recv_buffer);
+		
+		fill_IP_header_dump(ip_outer, buf, &len, (unsigned char *)ping->packet.recv_buffer);
+		fill_IP_header(ip_outer, buf, &len);
+		fill_ICMP_header(icmp_inner, icmp_outer, buf, &len, bytes_len);
+	}	
+
+	_(STDOUT_FILENO, buf);
 }

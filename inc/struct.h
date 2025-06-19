@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 16:29:31 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 15:36:30 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,12 @@
 
 #include <stddef.h>
 #include <netinet/in.h>
+#include <netinet/ip_icmp.h>
 #include <stdbool.h>
+
+#define MAX_PAYLOAD_SIZE 56
+#define RECV_BUFFER_SIZE 2048
+#define SIZEOF_ICMP_HEADER sizeof(struct icmp)
 
 typedef struct timeval t_timeval;
 
@@ -37,6 +42,18 @@ typedef struct s_ping {
 	bool	is_valid;
 	char 	*target_hostname;
 	in_addr_t	target_ip;
+
+	struct {
+		ssize_t bytes_read;
+		ssize_t iph_len;
+		char   	recv_buffer[RECV_BUFFER_SIZE];
+		
+		ssize_t bytes_sent;
+		char   	send_buffer[MAX_PAYLOAD_SIZE + SIZEOF_ICMP_HEADER];
+
+		struct icmphdr *icmp_header;
+	} packet;
+ 
 }	t_ping;
 
 typedef struct s_ping_stats {

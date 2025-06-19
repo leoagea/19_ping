@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 13:38:36 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 18:34:24 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,9 @@ void build_echo_request(char *buf, size_t payload_len, int count)
 	build_payload(payload, payload_len);
 
     size_t icmp_len = sizeof(*icmph) + payload_len;
+    // printf("ICMP size: %zu bytes\n", sizeof(*icmph));
+    // printf("Payload size: %zu bytes\n", payload_len);
+    // printf("ICMP packet size: %zu bytes\n", icmp_len);
     icmph->icmp_cksum = checksum(buf, icmp_len);
 }
 

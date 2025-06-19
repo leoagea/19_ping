@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 13:38:46 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 18:04:05 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,13 @@
 #include <netinet/ip_icmp.h> // ICMP protocol definitions
 #include <getopt.h>  // getopt_long
 
-#define PING_DEFAULT_COUNT 4
+#define PING_DEFAULT_COUNT 1
 #define MAX_PAYLOAD_SIZE 56
 #define RECV_BUFFER_SIZE 2048
+#define _(fd ,msg) write(fd, msg, strlen(msg));
+
+typedef struct icmphdr t_icmphdr;
+typedef struct iphdr t_iphdr;
 
 /*#############################################################################
 # Global Variables
@@ -90,6 +94,15 @@ double	stddev_calculate(t_ping *ping, double average);
 void print_ping_info(t_ping *ping);
 void print_global_stats(t_ping *ping, t_ping_stats *stats);
 void print_ping_stats(t_ping *ping, int ttl);
+void print_ttl_exceeded(t_ping *ping, char *ip_add);
+
+/*#############################################################################
+# Verbose.c
+#############################################################################*/
+
+void 	fill_IP_header_dump(t_iphdr *ip_hdr, char *buf, size_t *len, const unsigned char *packet);
+void	fill_IP_header(t_iphdr *ip_hdr, char *buf, size_t *len);
+void	fill_ICMP_header(t_icmphdr *inner_header, t_icmphdr *outer_header, char *buf, size_t *len, size_t bytes);
 
 /*#############################################################################
 # Utils.c
@@ -102,8 +115,11 @@ void	timeval_add(const struct timeval *a, const struct timeval *b, struct timeva
 void	timeval_sub(const struct timeval *a, const struct timeval *b, struct timeval *result);
 int 	timeval_cmp(const struct timeval *a, const struct timeval *b);
 uint16_t checksum(void *buf, size_t len);
-void signal_handler(int signum);
-void help(void);
+void	signal_handler(int signum);
+void 	help(void);
+t_icmphdr	*get_inner_icmp_header(char *buf);
+t_icmphdr	*get_outer_icmp_header(char *buf);
+t_iphdr 	*get_outer_ip_header(char *buf);
 
 /*#############################################################################
 # Free.c

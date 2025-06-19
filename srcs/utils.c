@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 16:35:23 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 17:10:31 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,4 +152,45 @@ void help(void)
     fprintf(stdout, "Options:\n");
     fprintf(stdout, "  -h, --help        Show this help message and exit\n");
     fprintf(stdout, "  -v, --verbose     Enable verbose output\n");
+}
+
+t_icmphdr *get_inner_icmp_header(char *buf)
+{
+    /* 1. Skip the OUTER IPv4 header */
+    struct iphdr *ip_outer = (struct iphdr *)buf;
+    size_t outer_ip_len    = ip_outer->ihl * 4;
+
+    uint8_t *pointer = (uint8_t *)buf + outer_ip_len;
+
+    /* 2. Skip the OUTER ICMP Time-Exceeded header (always 8 bytes) */
+    pointer += 8;
+
+    /* 3. p now points at the QUOTED inner IPv4 header */
+    struct iphdr *ip_inner = (struct iphdr *)pointer;
+    size_t inner_ip_len    = ip_inner->ihl * 4;
+    pointer += inner_ip_len;
+
+    /* 4. p now points at the QUOTED inner ICMP Echo header */
+    struct icmphdr *icmp_inner = (struct icmphdr *)pointer;
+
+    return icmp_inner;
+}
+
+t_icmphdr *get_outer_icmp_header(char *buf)
+{
+    /* 1. Skip the OUTER IPv4 header */
+	struct iphdr *ip_outer = (struct iphdr *)buf;
+	size_t outer_ip_len    = ip_outer->ihl * 4;
+    
+	uint8_t *pointer = (uint8_t *)buf + outer_ip_len;
+    
+	/* 2. Skip the OUTER ICMP Time-Exceeded header (always 8 bytes) */
+	struct icmphdr *icmp_outer = (struct icmphdr *)pointer;
+
+    return icmp_outer;
+}
+
+t_iphdr *get_outer_ip_header(char *buf)
+{
+    return (struct iphdr *)buf;
 }

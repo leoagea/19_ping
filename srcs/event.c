@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 13:36:39 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/19 15:39:09 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,23 +34,28 @@ static int send_ping(t_ping *ping, t_ping_stats *stats)
 
 static int receive_ping(t_ping *ping, t_ping_stats *stats)
 {
-	char buf[RECV_BUFFER_SIZE];
+	char *buf = ping->packet.recv_buffer;
 	struct sockaddr_in addr;
 	socklen_t addr_len = sizeof(addr);
 
-	ssize_t bytes = recvfrom(ping->sockfd, buf, sizeof(buf), 0, (struct sockaddr *)&addr, &addr_len);
-	if (bytes < 0) {
+	ping->packet.bytes_read = recvfrom(ping->sockfd, ping->packet.recv_buffer, sizeof(ping->packet.recv_buffer), 0, (struct sockaddr *)&addr, &addr_len);
+	if (ping->packet.bytes_read < 0) {
 		perror("recvfrom failed");
 		return -1;
 	}
 	
-	size_t ip_hl = ((struct iphdr *)buf)->ihl * 4;
-    struct icmphdr *ih = (void *)(buf + ip_hl);
+	ping->packet.iph_len = ((struct iphdr *)ping->packet.recv_buffer)->ihl * 4;
+	struct icmphdr *ih = (void *)(buf + ping->packet.iph_len);
+    ping->packet.icmp_header = ih;
 
 	if (ih->type == ICMP_ECHOREPLY)
-		handle_echo_reply(ping, stats, buf);
+		handle_echo_reply(ping, stats, ping->packet.recv_buffer);
 	else if (ih->type == ICMP_DEST_UNREACH){
 		fprintf(stderr, "Destination unreachable: %s\n", inet_ntoa(addr.sin_addr));
+		stats->packets_lost++;
+	}
+	else if (ih->type == ICMP_TIME_EXCEEDED){
+		print_ttl_exceeded(ping, inet_ntoa(addr.sin_addr));
 		stats->packets_lost++;
 	}
 	else if (ih->type != ICMP_ECHO){
