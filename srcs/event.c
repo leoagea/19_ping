@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:13:54 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:38:27 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,9 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 	print_ping_info(ping);
 	
 	while (true){
-		
-		// stats->packets_lost + stats->packets_received < PING_DEFAULT_COUNT
+		if (stats->packets_lost + stats->packets_received == (int)g_data->ping_count)
+			break ;
+
 		FD_ZERO(&read_fds);
 		FD_SET(ping->sockfd, &read_fds);
 

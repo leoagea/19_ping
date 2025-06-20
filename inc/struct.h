@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:16:25 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:32:00 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,9 @@ typedef struct timeval t_timeval;
 typedef struct s_options {
     bool      help;          // true if -h or --help was passed
     bool      verbose;       // true if -v or --verbose
-    char    **inputs;        // remaining positional arguments
+    char      **inputs;        // remaining positional arguments
     int       n_inputs;      // count of inputs
+	size_t    ping_count;    // number of pings to send
 } t_options;
 
 typedef struct s_ping {
