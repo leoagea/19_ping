@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:15:15 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 18:08:36 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,8 @@
 #############################################################################*/
 
 #define PING_DEFAULT_COUNT 1000
+#define PING_DEFAULT_INTERVAL 1
+#define PING_DEFAULT_TIMEOUT 1
 #define MAX_PAYLOAD_SIZE 56
 #define RECV_BUFFER_SIZE 2048
 #define IP_HEADER_SIZE 20
@@ -127,6 +129,7 @@ int 	timeval_cmp(const struct timeval *a, const struct timeval *b);
 uint16_t checksum(void *buf, size_t len);
 void	signal_handler(int signum);
 void 	help(void);
+void	exit_failure(const char *msg);
 t_icmphdr	*get_inner_icmp_header(char *buf);
 t_icmphdr	*get_outer_icmp_header(char *buf);
 t_iphdr 	*get_outer_ip_header(char *buf);

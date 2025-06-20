@@ -6,15 +6,14 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:38:27 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 18:22:21 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/ping.h"
 
-static int send_ping(t_ping *ping, t_ping_stats *stats)
+static int send_ping(t_ping *ping)
 {
-	(void)	stats;
 	char buf[MAX_PAYLOAD_SIZE + ICMP_HEADER_SIZE];
 	struct sockaddr_in dest_addr = {
         .sin_family = AF_INET,
@@ -93,19 +92,28 @@ static int safety_check(t_ping *ping, t_ping_stats *stats)
 int event_loop(t_ping *ping, t_ping_stats *stats)
 {
 	fd_set read_fds;
-	t_timeval tv, now, next_ping;
+	t_timeval tv, now, next_ping, last_ping;
 
 	if (safety_check(ping, stats) < 0)
 		return -1;
 		
-	ping->nfds = ping->sockfd + 1;
-	gettimeofday(&stats->last_ping_time, NULL);
-
 	print_ping_info(ping);
 	
+	gettimeofday(&last_ping, NULL);
+	
+	if (send_ping(ping) < 0)
+        return -1;
+	stats->packets_sent++;
+	ping->ping_count++;
+	
+	gettimeofday(&now, NULL);
+	stats->last_ping_time = now;
+	next_ping = last_ping;
+	next_ping.tv_sec += ping->ping_interval;
+
+	ping->nfds = ping->sockfd + 1;
+
 	while (true){
-		if (stats->packets_lost + stats->packets_received == (int)g_data->ping_count)
-			break ;
 
 		FD_ZERO(&read_fds);
 		FD_SET(ping->sockfd, &read_fds);
@@ -136,36 +144,38 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 		if (ready == 0) {
 			// Timeout occurred, no data available
 			t_timeval diff;
-			timeval_sub(&now, &stats->last_ping_time, &diff);
-			
-			if (ping->ping_timeout > 0 && diff.tv_sec >= (time_t)ping->ping_timeout) {
+			timersub(&now, &last_ping, &diff);
+			if (ping->ping_timeout > 0 && diff.tv_sec > (time_t)ping->ping_timeout)
 				stats->packets_lost++;
-				stats->last_ping_time = now;
-				ping->ping_count++;
-				continue;
-			}
 		}
 		
 		if (ready && FD_ISSET(ping->sockfd, &read_fds)) {
-			if (receive_ping(ping, stats) < 0) {
-				perror("Failed to receive ping");
+			if (receive_ping(ping, stats) < 0)
 				return -1;
-			}
+			stats->packets_received++;
 		}
 		
-		if (timeval_cmp(&now, &next_ping) >= 0) {
-			if (send_ping(ping, stats) < 0) {
+		if (timeval_cmp(&now, &next_ping) >= 0 && ping->ping_count < g_data->ping_count) {
+			int send_status = send_ping(ping);
+			if (send_status < 0) {
 				perror("Failed to send ping");
 				return -1;
 			}
-			stats->packets_sent++;
+			else if (send_status == 0){
+				stats->packets_sent++;
+				ping->ping_count++;
+				last_ping = now; 
+			}
+			
 			gettimeofday(&now, NULL);
 			stats->last_ping_time = now;
-			ping->ping_count++;
 			
 			next_ping = now;
 			next_ping.tv_sec += ping->ping_interval;
 		}
+
+		if (stats->packets_received + stats->packets_lost >= (int)g_data->ping_count)
+        	break;
 	}
 	print_global_stats(ping, stats);
 

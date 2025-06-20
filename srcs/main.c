@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:20:33 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:55:47 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,6 @@ int main(int ac, char **av)
 	
 	g_data->ac = ac;
 	g_data->av = av;
-	g_data->ping_count = 0;
 
 	atexit(free_data);
 	

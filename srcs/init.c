@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:28:17 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:38:40 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 18:08:44 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void init_data(t_data *data)
 
 	if (data->ping_count == 0)
 		data->ping_count = PING_DEFAULT_COUNT;
-	
+		
 	data->ping = calloc(data->ping_nb + 1, sizeof(t_ping));
 	if (!data->ping){
 		print_error("Memory allocation failed for ping structure.");
@@ -89,8 +89,8 @@ void init_socket(t_ping *ping)
 		return ;
 	}
 	ping->ping_count = 0;
-	ping->ping_interval = 1;
-	ping->ping_timeout = 2;
+	ping->ping_interval = (g_data->arg->ping_interval > 0) ? g_data->arg->ping_interval : PING_DEFAULT_INTERVAL;
+	ping->ping_timeout = (g_data->arg->ping_interval > 0) ? g_data->arg->ping_interval : PING_DEFAULT_TIMEOUT;
 
 	int status;
 

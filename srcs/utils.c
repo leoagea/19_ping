@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:17:13 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:53:17 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,6 +152,12 @@ void help(void)
     fprintf(stdout, "Options:\n");
     fprintf(stdout, "  -h, --help        Show this help message and exit\n");
     fprintf(stdout, "  -v, --verbose     Enable verbose output\n");
+}
+
+void exit_failure(const char *msg)
+{
+    _(STDERR_FILENO, msg);
+    exit(EXIT_FAILURE);
 }
 
 t_icmphdr *get_inner_icmp_header(char *buf)

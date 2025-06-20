@@ -10,7 +10,7 @@ NC     := \033[0m
 # Compiler & Flags
 ###############################################################################
 CC       = gcc
-CFLAGS   = -Wall -Wextra -Werror -O2 -MMD -MP -g #-fsanitize=address
+CFLAGS   = -Wall -Wextra -Werror -O2 -MMD -MP -g -fsanitize=address
 LDFLAGS  = -lm 
 # -MMD and -MP tell the compiler to generate .d (dependency) files for each .c
 
@@ -97,12 +97,6 @@ help:
 ###############################################################################
 # Tests Rules
 ###############################################################################
-valgrind: $(TARGET)
-	@echo "$(BLUE)Running valgrind...$(NC)"
-	valgrind --leak-check=full \
-		--show-leak-kinds=all \
-		--track-origins=yes \
-		./$(TARGET) $(ARGS)
 
 TEST_DIR = tests
 TEST_SCRIPTS =  $(TEST_DIR)/test_invalid.sh \

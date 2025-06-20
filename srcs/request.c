@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 18:41:09 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 17:25:31 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,9 +58,6 @@ void build_echo_request(char *buf, size_t payload_len, int count)
 	build_payload(payload, payload_len);
 
     size_t icmp_len = sizeof(*icmph) + payload_len;
-    // printf("ICMP size: %zu bytes\n", sizeof(*icmph));
-    // printf("Payload size: %zu bytes\n", payload_len);
-    // printf("ICMP packet size: %zu bytes\n", icmp_len);
     icmph->checksum = checksum(buf, icmp_len);
 }
 
@@ -103,8 +100,9 @@ int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
 	rtt_calculate(ping, stats, buf + iphl + ICMP_HEADER_SIZE);
 
     int ttl =  ip->ttl;
-	print_ping_stats(ping, ttl);
+
+    if (!g_data->arg->quiet)
+	    print_ping_stats(ping, ttl);
 	
-	stats->packets_received++;
     return 0;
 }
