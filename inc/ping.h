@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 18:37:53 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:15:15 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,12 +36,20 @@
 #include <netinet/ip_icmp.h> // ICMP protocol definitions
 #include <getopt.h>  // getopt_long
 
-#define PING_DEFAULT_COUNT 1
+/*#############################################################################
+# Define Variables
+#############################################################################*/
+
+#define PING_DEFAULT_COUNT 1000
 #define MAX_PAYLOAD_SIZE 56
 #define RECV_BUFFER_SIZE 2048
 #define IP_HEADER_SIZE 20
 #define ICMP_HEADER_SIZE sizeof(struct icmphdr)
 #define _(fd ,msg) write(fd, msg, strlen(msg));
+
+/*#############################################################################
+# Typedef Variables
+#############################################################################*/
 
 typedef struct icmphdr t_icmphdr;
 typedef struct iphdr t_iphdr;

@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 17:10:31 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:17:13 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,8 +139,8 @@ uint16_t checksum(void *buf, size_t len)
 void signal_handler(int sig)
 {
     if (sig == SIGINT){
-		t_ping *ping = &g_data->ping[g_data->ping_count];
-		t_ping_stats *stats = &g_data->stats[g_data->ping_count];
+		t_ping *ping = &g_data->ping[g_data->ping_index];
+		t_ping_stats *stats = &g_data->stats[g_data->ping_index];
 		print_global_stats(ping, stats);
 		exit(EXIT_SUCCESS);
 	}

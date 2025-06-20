@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 15:36:30 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:16:25 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@ typedef struct s_options {
 typedef struct s_ping {
 	int		sockfd;
 	int  	nfds;
-	int		ping_count;
-	int		ping_interval;
-	int		ping_timeout;
+	size_t	ping_count;
+	size_t	ping_interval;
+	size_t	ping_timeout;
 	double	*rtt;
 
 	bool	is_valid;
@@ -75,6 +75,7 @@ typedef struct s_data {
 	t_ping			*ping;
 	t_ping_stats	*stats;
 	size_t			ping_nb;
+	size_t			ping_index;
 	size_t			ping_count;
 }	t_data;
 

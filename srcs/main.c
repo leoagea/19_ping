@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 13:44:01 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:20:33 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ static void ping_loop(t_data *data)
 		if (event_loop(&g_data->ping[i], &g_data->stats[i]) < 0){
 			print_error("Event loop failed");
 		}
-		g_data->ping_count++;
+		g_data->ping_index++;
 		i++;
 	}
 }
@@ -57,7 +57,8 @@ int main(int ac, char **av)
 	
 	g_data->ac = ac;
 	g_data->av = av;
-	
+	g_data->ping_count = 0;
+
 	atexit(free_data);
 	
 	parse_arg(g_data);

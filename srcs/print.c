@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/19 18:04:14 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:13:31 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,14 @@ void print_global_stats(t_ping *ping, t_ping_stats *stats)
 
 void print_ping_stats(t_ping *ping, int ttl)
 {
-	fprintf(stdout, "%zu bytes from %s: icmp_seq=%d ttl=%d time=%.3f ms\n",
+	char buf[2048];
+
+	snprintf(buf, sizeof(buf), "%zu bytes from %s: icmp_seq=%ld ttl=%u time=%.3f ms\n",
 		ping->packet.bytes_read - ping->packet.iph_len, 
 		inet_ntoa(*(struct in_addr *)&ping->target_ip),
 		ping->ping_count - 1, ttl, ping->rtt[ping->ping_count - 1]);
+
+	_(STDOUT_FILENO, buf);
 }
 
 void print_ttl_exceeded(t_ping *ping, char *ip_add)
@@ -65,7 +69,7 @@ void print_ttl_exceeded(t_ping *ping, char *ip_add)
 	char buf[2048];
 	size_t len = 0;
 	
-	size_t bytes_len = ping->packet.bytes_read - 2 * ping->packet.iph_len;
+	size_t bytes_len = ping->packet.bytes_read - ping->packet.iph_len;
 	len = snprintf(buf, sizeof(buf), "%ld bytes from %s: Time to live exceeded\n", bytes_len, ip_add);
 	
 	if (g_data->arg->verbose){

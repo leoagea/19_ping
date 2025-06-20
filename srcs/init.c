@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:28:17 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/18 16:32:40 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 14:20:44 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,11 @@
 
 void init_data(t_data *data)
 {
-	data->ping_count = 0;
+	data->ping_index = 0;
+
+	if (data->ping_count == 0)
+		data->ping_count = PING_DEFAULT_COUNT;
+	
 	data->ping = calloc(data->ping_nb + 1, sizeof(t_ping));
 	if (!data->ping)
 	{
@@ -72,7 +76,7 @@ void init_socket(t_ping *ping)
 		return ;
 	}
 	
-	ping->rtt = calloc(PING_DEFAULT_COUNT, sizeof(double));
+	ping->rtt = calloc(g_data->ping_count, sizeof(double));
 	if (!ping->rtt)
 	{
 		print_error("Memory allocation failed for RTT array.");
