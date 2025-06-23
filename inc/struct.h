@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 17:12:05 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 18:41:38 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,11 @@ typedef struct s_options {
     bool      verbose;       // true if -v or --verbose
 	bool 	  quiet;         // true if -c or --count was passed
 	bool	  flood;         // true if -f or --flood was passed
+	bool	  timeout;       // true if -w or --timeout was passed
     char      **inputs;        // remaining positional arguments
     int       n_inputs;      // count of inputs
 	size_t    ping_interval; // interval between pings in seconds
+	t_timeval t_timeout;  // timeout for each ping in seconds
 } t_options;
 
 typedef struct s_ping {

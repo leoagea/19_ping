@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 17:25:31 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 14:26:28 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,5 +104,6 @@ int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
     if (!g_data->arg->quiet)
 	    print_ping_stats(ping, ttl);
 	
+    stats->packets_received++;
     return 0;
 }

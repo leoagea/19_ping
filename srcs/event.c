@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 18:22:21 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 14:34:51 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,13 +92,14 @@ static int safety_check(t_ping *ping, t_ping_stats *stats)
 int event_loop(t_ping *ping, t_ping_stats *stats)
 {
 	fd_set read_fds;
-	t_timeval tv, now, next_ping, last_ping;
-
+	t_timeval tv, now, next_ping, last_ping, start, elapsed;
+	
 	if (safety_check(ping, stats) < 0)
-		return -1;
-		
+	return -1;
+	
 	print_ping_info(ping);
 	
+	gettimeofday(&start, NULL);
 	gettimeofday(&last_ping, NULL);
 	
 	if (send_ping(ping) < 0)
@@ -125,6 +126,16 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 
 		timeval_sub(&next_ping, &now, &tv);
 		
+		if (g_data->arg->timeout && g_data->arg->t_timeout.tv_sec > 0){
+			timeval_sub(&now, &start, &elapsed);
+			if (elapsed.tv_sec >= g_data->arg->t_timeout.tv_sec) {
+				if (stats->packets_lost + stats->packets_received != stats->packets_sent)
+					stats->packets_lost = stats->packets_sent - (stats->packets_received + stats->packets_lost);
+				print_global_stats(ping, stats);
+				exit(EXIT_SUCCESS);
+			}
+		}
+
 		if (tv.tv_sec < 0 || (tv.tv_sec == 0 && tv.tv_usec < 0)) {
             tv.tv_sec = 0;
             tv.tv_usec = 0;
@@ -152,7 +163,6 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 		if (ready && FD_ISSET(ping->sockfd, &read_fds)) {
 			if (receive_ping(ping, stats) < 0)
 				return -1;
-			stats->packets_received++;
 		}
 		
 		if (timeval_cmp(&now, &next_ping) >= 0 && ping->ping_count < g_data->ping_count) {
@@ -177,6 +187,11 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 		if (stats->packets_received + stats->packets_lost >= (int)g_data->ping_count)
         	break;
 	}
+
+	debug_print_stats(stats);
+	if (stats->packets_lost + stats->packets_received != stats->packets_sent)
+		stats->packets_lost = stats->packets_sent - (stats->packets_received + stats->packets_lost);
+
 	print_global_stats(ping, stats);
 
 	return 0;

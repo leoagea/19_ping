@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 16:04:42 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 17:13:38 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/20 18:42:47 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,17 @@ static void parse_optarg(t_options *opt, const char *optarg, const char *option_
 				exit_failure(buf);
 			}
 		}
+		else if (strcmp(option_name, "timeout") == 0) {
+			opt->t_timeout.tv_sec = atoi(optarg);
+			if (opt->t_timeout.tv_sec <= 0) {
+				snprintf(buf, sizeof(buf), "ping: invalid timeout value '%s'\n", optarg);
+				exit_failure(buf);
+			}
+			opt->timeout = true;
+		} else {
+			snprintf(buf, sizeof(buf), "ping: unknown option '%s'\n", option_name);
+			exit_failure(buf);
+		}
 	} else {
 		snprintf(buf, sizeof(buf), "ping: option requires an argument -- '%s'\n", option_name);
 		exit_failure(buf);
@@ -42,7 +53,7 @@ void parse_arg(t_data *data)
 	t_options *opt = calloc(1, sizeof(t_options));
 	init_options(opt);
 
-	const char *short_opts = "hvc:i:qf";
+	const char *short_opts = "hvc:i:qfw:";
 	const struct option long_opts[] = {
 		{ "help",     no_argument,       NULL, 'h' },
 		{ "verbose",  no_argument,       NULL, 'v' },
@@ -50,6 +61,7 @@ void parse_arg(t_data *data)
 		{ "interval", required_argument, NULL, 'i' },
 		{ "quiet",    no_argument,       NULL, 'q' },
 		{ "flood",    required_argument, NULL, 'f' },
+		{ "timeout",  required_argument, NULL, 'w' },
 		{ NULL,       0,                 NULL,  0  }
     };
 	
@@ -78,6 +90,10 @@ void parse_arg(t_data *data)
 
 			case 'f':
 				opt->flood = true;
+				break;
+
+			case 'w':
+				parse_optarg(opt, optarg, "timeout");
 				break;
 
 			case '?':

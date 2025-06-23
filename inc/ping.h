@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 18:08:36 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 14:29:48 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,7 @@ void 	free_data(void);
 #############################################################################*/
 
 void	debug_print_all_ping_struct(t_data *data);
+void	debug_print_stats(t_ping_stats *stats);
 
 
 #endif
