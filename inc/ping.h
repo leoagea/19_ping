@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 14:29:48 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 15:57:57 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,20 @@
 #include <sys/socket.h> // socket, setsockopt
 #include <netinet/ip_icmp.h> // ICMP protocol definitions
 #include <getopt.h>  // getopt_long
+#include <fcntl.h>   // fcntl
 
 /*#############################################################################
 # Define Variables
 #############################################################################*/
 
-#define PING_DEFAULT_COUNT 1000
+#define PING_DEFAULT_COUNT 10000
 #define PING_DEFAULT_INTERVAL 1
 #define PING_DEFAULT_TIMEOUT 1
 #define MAX_PAYLOAD_SIZE 56
 #define RECV_BUFFER_SIZE 2048
 #define IP_HEADER_SIZE 20
 #define ICMP_HEADER_SIZE sizeof(struct icmphdr)
+#define BUF_LEN 256
 #define _(fd ,msg) write(fd, msg, strlen(msg));
 
 /*#############################################################################

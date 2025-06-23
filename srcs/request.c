@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 14:26:28 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 16:15:01 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ static int check_response_header(char *buf, int count)
         return -1;
     }
     
-    if (ntohs(icmph->un.echo.sequence) != count) {
+    if (!g_data->arg->flood && ntohs(icmph->un.echo.sequence) != count) {
         fprintf(stderr, "Received packet with invalid sequence number: %d\n", ntohs(icmph->un.echo.sequence));
         return -1;
     }
@@ -89,11 +89,12 @@ static int check_response_header(char *buf, int count)
 
 int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
 {
+    char pbuf[BUF_LEN] = {0};
     struct iphdr  *ip  = (struct iphdr *)buf;
     size_t iphl = ip->ihl * 4; 
 	
 	if (check_response_header(buf + iphl, ping->ping_count - 1) == -1) {
-		fprintf(stderr, "Received invalid ICMP packet\n");
+		snprintf(pbuf, BUF_LEN, "Received invalid ICMP packet\n");
 		return -1;
 	}
 	
@@ -105,5 +106,7 @@ int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
 	    print_ping_stats(ping, ttl);
 	
     stats->packets_received++;
+
+    _(STDOUT_FILENO, pbuf);
     return 0;
 }

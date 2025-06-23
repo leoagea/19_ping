@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:55:47 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 15:52:37 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ static void ping_loop(t_data *data)
 static bool check_root_privileges(void)
 {
 	if (getuid() != 0) {
-		fprintf(stderr, "This program requires root privileges.\n");
-        fprintf(stderr, "Please run with sudo: sudo ./ft_ping <destination>\n");
+		print_error("This program requires root privileges.\n");
+        print_error("Please run with sudo: sudo ./ft_ping <destination>\n");
 		return false;
 	}
 	return true;
@@ -64,6 +64,6 @@ int main(int ac, char **av)
 	init_data(g_data);
 	init_signals();
 	ping_loop(g_data);
-	
+
 	return EXIT_SUCCESS;
 }

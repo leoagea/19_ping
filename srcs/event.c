@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 14:34:51 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 16:29:58 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ static int send_ping(t_ping *ping)
 static int receive_ping(t_ping *ping, t_ping_stats *stats)
 {
 	char *buf = ping->packet.recv_buffer;
+	char pbuf[BUF_LEN] = {0};
 	struct sockaddr_in addr;
 	socklen_t addr_len = sizeof(addr);
 
@@ -50,7 +51,7 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 	if (ih->type == ICMP_ECHOREPLY)
 		handle_echo_reply(ping, stats, ping->packet.recv_buffer);
 	else if (ih->type == ICMP_DEST_UNREACH){
-		fprintf(stderr, "Destination unreachable: %s\n", inet_ntoa(addr.sin_addr));
+		snprintf(pbuf, BUF_LEN, "Destination unreachable: %s\n", inet_ntoa(addr.sin_addr));
 		stats->packets_lost++;
 	}
 	else if (ih->type == ICMP_TIME_EXCEEDED){
@@ -58,10 +59,11 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 		stats->packets_lost++;
 	}
 	else if (ih->type != ICMP_ECHO){
-		fprintf(stderr, "Received unexpected ICMP type: %d\n", ih->type);
+		snprintf(pbuf, BUF_LEN, "Received unexpected ICMP type: %d\n", ih->type);
 		stats->packets_lost++;
 	}
-	
+
+	_(STDOUT_FILENO, pbuf);
 	return 0;
 }
 
@@ -92,11 +94,19 @@ static int safety_check(t_ping *ping, t_ping_stats *stats)
 int event_loop(t_ping *ping, t_ping_stats *stats)
 {
 	fd_set read_fds;
+	t_options *flag = g_data->arg;
 	t_timeval tv, now, next_ping, last_ping, start, elapsed;
 	
 	if (safety_check(ping, stats) < 0)
 	return -1;
-	
+
+	if (flag->flood) {
+    	if (fcntl(ping->sockfd, F_SETFL, O_NONBLOCK) == -1) {
+			print_error("Failed to set socket to non-blocking mode.");
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	print_ping_info(ping);
 	
 	gettimeofday(&start, NULL);
@@ -120,9 +130,13 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 		FD_SET(ping->sockfd, &read_fds);
 
 		gettimeofday(&now, NULL);
-		
-        next_ping = stats->last_ping_time;
-        next_ping.tv_sec += ping->ping_interval;
+
+		if (flag->flood)
+			next_ping = now;
+		else{
+			next_ping = stats->last_ping_time;
+			next_ping.tv_sec += ping->ping_interval;
+		}
 
 		timeval_sub(&next_ping, &now, &tv);
 		
@@ -165,20 +179,24 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
 				return -1;
 		}
 		
-		if (timeval_cmp(&now, &next_ping) >= 0 && ping->ping_count < g_data->ping_count) {
+		if ((flag->flood || timeval_cmp(&now, &next_ping) >= 0) && ping->ping_count < g_data->ping_count) {
 			int send_status = send_ping(ping);
 			if (send_status < 0) {
 				perror("Failed to send ping");
 				return -1;
 			}
 			else if (send_status == 0){
+				if (flag->flood)
+					nanosleep(&(struct timespec){0, 100000}, NULL);
 				stats->packets_sent++;
 				ping->ping_count++;
 				last_ping = now; 
+				if (!flag->flood){
+					gettimeofday(&now, NULL);
+					stats->last_ping_time = now;
+				}
 			}
 			
-			gettimeofday(&now, NULL);
-			stats->last_ping_time = now;
 			
 			next_ping = now;
 			next_ping.tv_sec += ping->ping_interval;
@@ -188,7 +206,7 @@ int event_loop(t_ping *ping, t_ping_stats *stats)
         	break;
 	}
 
-	debug_print_stats(stats);
+	// debug_print_stats(stats);
 	if (stats->packets_lost + stats->packets_received != stats->packets_sent)
 		stats->packets_lost = stats->packets_sent - (stats->packets_received + stats->packets_lost);
 

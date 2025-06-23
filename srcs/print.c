@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 14:34:10 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 16:40:01 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,49 +14,49 @@
 
 void print_ping_info(t_ping *ping)
 {
-	char *buf = calloc(256, sizeof(char));
-	if  (!buf) {
-		print_error("Memory allocation failed for ping info buffer.");
-		return;
-	}
+	char buf[BUF_LEN] = {0};
+	size_t len = 0;
 	
-	int len = snprintf(buf, 256, "PING %s (%s): 56 data bytes",
+	len = snprintf(buf, BUF_LEN, "PING %s (%s): 56 data bytes",
 		ping->target_hostname ? ping->target_hostname : inet_ntoa(*(struct in_addr *)&ping->target_ip),
 		inet_ntoa(*(struct in_addr *)&ping->target_ip));
 		
 	if (g_data->arg->verbose){
 		size_t pid = getpid();
-		len += snprintf(buf + len, 256 - len, ", id 0x%lX = %d", pid, (int)pid);
+		len += snprintf(buf + len, BUF_LEN - len, ", id 0x%lX = %d", pid, (int)pid);
 	}
 	snprintf(buf + len, 2, "\n");
-	fprintf(stdout, "%s", buf);
 
-	free(buf);
+	_(STDOUT_FILENO, buf);
 }
 
 void print_global_stats(t_ping *ping, t_ping_stats *stats)
 {
+	char buf[BUF_LEN] = {0};
+	size_t len = 0;
 	char *hostname = ping->target_hostname ? ping->target_hostname : inet_ntoa(*(struct in_addr *)&ping->target_ip);
-	
-	fprintf(stdout, "--- %s ping statistics ---\n", hostname);
-	fprintf(stdout, "%d packets transmitted, %d packets received, %.0f%% packet loss\n",
+
+	len = snprintf(buf, BUF_LEN, "--- %s ping statistics ---\n", hostname);
+	len += snprintf(buf + len, BUF_LEN - len, "%d packets transmitted, %d packets received, %.0f%% packet loss\n",
 		stats->packets_sent, stats->packets_received,
 		(double)stats->packets_lost / stats->packets_sent * 100.0);
 	
 	double avg_rtt = rtt_avg_calculate(ping);
 	double stddev_rtt = stddev_calculate(ping, avg_rtt);
 	if (stats->packets_received > 0) {
-		fprintf(stdout, "round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
+		len += snprintf(buf + len, BUF_LEN - len, "round-trip min/avg/max/stddev = %.3f/%.3f/%.3f/%.3f ms\n",
 			stats->min_rtt, avg_rtt, stats->max_rtt, stddev_rtt);
 	}
+	
+	_(STDOUT_FILENO, buf);
 }
 
 
 void print_ping_stats(t_ping *ping, int ttl)
 {
-	char buf[2048];
+	char buf[BUF_LEN] = {0};
 
-	snprintf(buf, sizeof(buf), "%zu bytes from %s: icmp_seq=%ld ttl=%u time=%.3f ms\n",
+	snprintf(buf, BUF_LEN, "%zu bytes from %s: icmp_seq=%ld ttl=%u time=%.3f ms\n",
 		ping->packet.bytes_read - ping->packet.iph_len, 
 		inet_ntoa(*(struct in_addr *)&ping->target_ip),
 		ping->ping_count - 1, ttl, ping->rtt[ping->ping_count - 1]);
@@ -66,11 +66,11 @@ void print_ping_stats(t_ping *ping, int ttl)
 
 void print_ttl_exceeded(t_ping *ping, char *ip_add)
 {
-	char buf[2048];
+	char buf[BUF_LEN] = {0};
 	size_t len = 0;
 	
 	size_t bytes_len = ping->packet.bytes_read - ping->packet.iph_len;
-	len = snprintf(buf, sizeof(buf), "%ld bytes from %s: Time to live exceeded\n", bytes_len, ip_add);
+	len = snprintf(buf, BUF_LEN, "%ld bytes from %s: Time to live exceeded\n", bytes_len, ip_add);
 	
 	if (g_data->arg->verbose){
 		t_iphdr *ip_outer = get_outer_ip_header(ping->packet.recv_buffer);

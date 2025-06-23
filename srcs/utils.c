@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 14:53:17 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 16:13:47 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,10 @@
 
 void print_error(const char *msg)
 {
-	fprintf(stderr, "%s\n", msg);
+    char buf[256] = {0};
+    
+    snprintf(buf, sizeof(buf), "ping: %s", msg);
+	_(STDERR_FILENO, buf);
 }
 
 void usage(void)

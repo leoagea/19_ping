@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 16:04:42 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 18:42:47 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 16:14:06 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 static void parse_optarg(t_options *opt, const char *optarg, const char *option_name)
 {
-	char buf[256];
+	char buf[256] = {0};
 	
 	if (optarg) {
 		if (strcmp(option_name, "count") == 0) {
@@ -51,6 +51,11 @@ static void parse_optarg(t_options *opt, const char *optarg, const char *option_
 void parse_arg(t_data *data)
 {
 	t_options *opt = calloc(1, sizeof(t_options));
+	if (!opt) {
+		print_error("Memory allocation failed for options structure.");
+		exit(EXIT_FAILURE);
+	}
+
 	init_options(opt);
 
 	const char *short_opts = "hvc:i:qfw:";
@@ -89,6 +94,7 @@ void parse_arg(t_data *data)
 				break;
 
 			case 'f':
+				opt->quiet = true;
 				opt->flood = true;
 				break;
 
