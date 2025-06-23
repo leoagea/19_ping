@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 15:57:57 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 19:36:00 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@
 #include <netinet/ip_icmp.h> // ICMP protocol definitions
 #include <getopt.h>  // getopt_long
 #include <fcntl.h>   // fcntl
+#include <sys/types.h> // ssize_t
+#include <netdb.h> // getaddrinfo, gai_strerror
 
 /*#############################################################################
 # Define Variables
@@ -47,7 +49,7 @@
 #define MAX_PAYLOAD_SIZE 56
 #define RECV_BUFFER_SIZE 2048
 #define IP_HEADER_SIZE 20
-#define ICMP_HEADER_SIZE sizeof(struct icmphdr)
+#define ICMP4_HEADER_SIZE sizeof(struct icmphdr)
 #define BUF_LEN 256
 #define _(fd ,msg) write(fd, msg, strlen(msg));
 
@@ -107,7 +109,7 @@ double	stddev_calculate(t_ping *ping, double average);
 
 void print_ping_info(t_ping *ping);
 void print_global_stats(t_ping *ping, t_ping_stats *stats);
-void print_ping_stats(t_ping *ping, int ttl);
+void print_ping_stats(t_ping *ping);
 void print_ttl_exceeded(t_ping *ping, char *ip_add);
 
 /*#############################################################################
@@ -135,6 +137,8 @@ void	exit_failure(const char *msg);
 t_icmphdr	*get_inner_icmp_header(char *buf);
 t_icmphdr	*get_outer_icmp_header(char *buf);
 t_iphdr 	*get_outer_ip_header(char *buf);
+char		*get_ip_string(const t_sockaddr *addr);
+socklen_t	get_sockaddr_len(const t_sockaddr *addr);
 
 /*#############################################################################
 # Free.c

@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 16:15:01 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 19:36:28 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ void build_echo_request(char *buf, size_t payload_len, int count)
     icmph->un.echo.id = htons((uint16_t)getpid() & 0xFFFF);
     icmph->un.echo.sequence = htons(count++ & 0xFFFF);
 
-    char *payload = (char *)buf + ICMP_HEADER_SIZE;
+    char *payload = (char *)buf + ICMP4_HEADER_SIZE;
 	build_payload(payload, payload_len);
 
     size_t icmp_len = sizeof(*icmph) + payload_len;
@@ -97,13 +97,13 @@ int handle_echo_reply(t_ping *ping, t_ping_stats *stats, char *buf)
 		snprintf(pbuf, BUF_LEN, "Received invalid ICMP packet\n");
 		return -1;
 	}
-	
-	rtt_calculate(ping, stats, buf + iphl + ICMP_HEADER_SIZE);
 
-    int ttl =  ip->ttl;
+	rtt_calculate(ping, stats, buf + iphl + ICMP4_HEADER_SIZE);
+
+    ping->ttl =  ip->ttl;
 
     if (!g_data->arg->quiet)
-	    print_ping_stats(ping, ttl);
+	    print_ping_stats(ping);
 	
     stats->packets_received++;
 

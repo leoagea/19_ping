@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 16:03:52 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 16:29:58 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 19:36:51 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 static int send_ping(t_ping *ping)
 {
-	char buf[MAX_PAYLOAD_SIZE + ICMP_HEADER_SIZE];
+	char buf[MAX_PAYLOAD_SIZE + ICMP4_HEADER_SIZE];
 	struct sockaddr_in dest_addr = {
         .sin_family = AF_INET,
         .sin_addr.s_addr = ping->target_ip
@@ -22,7 +22,7 @@ static int send_ping(t_ping *ping)
 	
 	build_echo_request(&buf[0], MAX_PAYLOAD_SIZE, ping->ping_count);
 	
-	if (sendto(ping->sockfd, buf, ICMP_HEADER_SIZE + MAX_PAYLOAD_SIZE, 0,
+	if (sendto(ping->sockfd, buf, ICMP4_HEADER_SIZE + MAX_PAYLOAD_SIZE, 0,
 			(struct sockaddr *)&dest_addr, sizeof(dest_addr)) < 0) {
 				perror("sendto failed");
 				return -1;
@@ -46,7 +46,6 @@ static int receive_ping(t_ping *ping, t_ping_stats *stats)
 	
 	ping->packet.iph_len = ((struct iphdr *)ping->packet.recv_buffer)->ihl * 4;
 	struct icmphdr *ih = (void *)(buf + ping->packet.iph_len);
-    ping->packet.icmp_header = ih;
 
 	if (ih->type == ICMP_ECHOREPLY)
 		handle_echo_reply(ping, stats, ping->packet.recv_buffer);

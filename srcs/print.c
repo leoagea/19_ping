@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 16:40:01 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 19:43:11 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ void print_ping_info(t_ping *ping)
 	size_t len = 0;
 	
 	len = snprintf(buf, BUF_LEN, "PING %s (%s): 56 data bytes",
-		ping->target_hostname ? ping->target_hostname : inet_ntoa(*(struct in_addr *)&ping->target_ip),
-		inet_ntoa(*(struct in_addr *)&ping->target_ip));
+		ping->target_hostname ? ping->target_hostname : get_ip_string((t_sockaddr *)&ping->addr),
+		 get_ip_string((t_sockaddr *)&ping->addr));
 		
 	if (g_data->arg->verbose){
 		size_t pid = getpid();
@@ -34,7 +34,7 @@ void print_global_stats(t_ping *ping, t_ping_stats *stats)
 {
 	char buf[BUF_LEN] = {0};
 	size_t len = 0;
-	char *hostname = ping->target_hostname ? ping->target_hostname : inet_ntoa(*(struct in_addr *)&ping->target_ip);
+	char *hostname = ping->target_hostname ? ping->target_hostname : get_ip_string((t_sockaddr *)&ping->addr);
 
 	len = snprintf(buf, BUF_LEN, "--- %s ping statistics ---\n", hostname);
 	len += snprintf(buf + len, BUF_LEN - len, "%d packets transmitted, %d packets received, %.0f%% packet loss\n",
@@ -52,14 +52,14 @@ void print_global_stats(t_ping *ping, t_ping_stats *stats)
 }
 
 
-void print_ping_stats(t_ping *ping, int ttl)
+void print_ping_stats(t_ping *ping)
 {
 	char buf[BUF_LEN] = {0};
 
 	snprintf(buf, BUF_LEN, "%zu bytes from %s: icmp_seq=%ld ttl=%u time=%.3f ms\n",
 		ping->packet.bytes_read - ping->packet.iph_len, 
-		inet_ntoa(*(struct in_addr *)&ping->target_ip),
-		ping->ping_count - 1, ttl, ping->rtt[ping->ping_count - 1]);
+		get_ip_string((t_sockaddr *)&ping->addr),
+		ping->ping_count - 1, ping->ttl, ping->rtt[ping->ping_count - 1]);
 
 	_(STDOUT_FILENO, buf);
 }

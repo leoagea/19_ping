@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:14:02 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/20 18:41:38 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/23 19:38:15 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #define SIZEOF_ICMP_HEADER sizeof(struct icmp)
 
 typedef struct timeval t_timeval;
+typedef struct sockaddr_storage t_sockaddr;
 
 typedef struct s_options {
     bool      help;          // true if -h or --help was passed
@@ -42,6 +43,8 @@ typedef struct s_ping {
 	size_t	ping_count;
 	size_t	ping_interval;
 	size_t	ping_timeout;
+
+	int 	ttl;
 	double	*rtt;
 
 	bool	is_valid;
@@ -52,12 +55,13 @@ typedef struct s_ping {
 		ssize_t bytes_read;
 		ssize_t iph_len;
 		char   	recv_buffer[RECV_BUFFER_SIZE];
+		char	addrstr[INET6_ADDRSTRLEN];
 		
 		ssize_t bytes_sent;
 		char   	send_buffer[MAX_PAYLOAD_SIZE + SIZEOF_ICMP_HEADER];
-
-		struct icmphdr *icmp_header;
 	} packet;
+
+	t_sockaddr addr; // address structure for the target
  
 }	t_ping;
 
