@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 13:34:38 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/24 14:40:46 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/24 15:25:03 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,7 @@ void checkTarget(t_ping *ping, const char *target)
 
 	status = getaddrinfo(target, NULL, &hints, &result);
 	if (status != 0) {
-		char error_msg[256];
-		snprintf(error_msg, sizeof(error_msg), "%s: %s\n", target, gai_strerror(status));
-		print_error(error_msg);
+		print_error("unknown host\n");
 		ping->is_valid = false;
 		return;
 	}

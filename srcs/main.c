@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 16:53:36 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/24 14:42:09 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/24 15:25:15 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,10 @@ static void ping_loop(t_data *data)
 	size_t i = 0;
 	while (i < data->ping_nb) {
 		checkTarget(&g_data->ping[i], g_data->arg->inputs[i]);
+		if (!g_data->ping[i].is_valid){
+			i++;
+			continue;
+		}
 		init_socket(&g_data->ping[i]);
 		if (event_loop(&g_data->ping[i], &g_data->stats[i]) < 0)
 			return;
