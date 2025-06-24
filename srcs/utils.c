@@ -6,237 +6,211 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/23 19:42:26 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/24 14:53:27 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/ping.h"
 
+/**
+ * Prints an error message to the standard error output.
+ * This function formats the error message with a prefix "ping: "
+ * and writes it to the standard error file descriptor.
+ * @param msg The error message to be printed.
+ * @return None
+ */
 void print_error(const char *msg)
 {
-    char buf[1024] = {0};
-    
-    snprintf(buf, sizeof(buf), "ping: %s", msg);
+	char buf[1024] = {0};
+
+	snprintf(buf, sizeof(buf), "ping: %s", msg);
 	_(STDERR_FILENO, buf);
 }
 
+/**
+ * Prints the usage information for the ping command.
+ * @param None
+ * @return None
+ */
 void usage(void)
 {
 	print_error("ping: missing host operand");
 	print_error("Try 'ping --help' for more information.");
 }
 
-void checkTarget(t_ping *ping, const char *target)
-{
-    if (!ping || !target) {
-        print_error("Invalid ping or target.");
-        ping->is_valid = false;
-        return;
-    }
 
-    struct addrinfo hints;
-    struct addrinfo *result = NULL;
-    int status;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_RAW;
-    hints.ai_flags = AI_CANONNAME;
-
-    status = getaddrinfo(target, NULL, &hints, &result);
-    if (status != 0) {
-        char error_msg[256];
-        snprintf(error_msg, sizeof(error_msg), "%s: %s\n", 
-                target, gai_strerror(status));
-        print_error(error_msg);
-        ping->is_valid = false;
-        return;
-    }
-
-    struct addrinfo *rp;
-    for (rp = result; rp != NULL; rp = rp->ai_next) {
-        if (rp->ai_family == AF_INET) {
-            // Copy the address to our sockaddr_storage
-            memcpy(&ping->addr, rp->ai_addr, rp->ai_addrlen);
-            break;
-        }
-        else{
-            print_error("Only IPv4 addresses are supported");
-            ping->is_valid = false;
-            freeaddrinfo(result);
-            return;
-        }
-    }
-
-    if (rp == NULL) {
-        print_error("No suitable address found");
-        ping->is_valid = false;
-        freeaddrinfo(result);
-        return;
-    }
-
-    // Check if target was a hostname (not an IP address)
-    struct sockaddr_in sa4;
-    bool is_ipv4 = (inet_pton(AF_INET, target, &sa4.sin_addr) == 1);
-    
-    if (!is_ipv4) {
-        ping->target_hostname = strdup(target);
-        if (!ping->target_hostname) {
-            print_error("Memory allocation failed for hostname");
-            ping->is_valid = false;
-            freeaddrinfo(result);
-            return;
-        }
-    } else {
-        ping->target_hostname = NULL;
-    }
-
-    ping->target_ip = ((struct sockaddr_in *)&ping->addr)->sin_addr.s_addr;
-
-    ping->is_valid = true;
-    freeaddrinfo(result);
-}
-
+/**
+ * Adds two timeval structures and stores the result in a third timeval structure.
+ * This function handles the addition of seconds and microseconds,
+ * ensuring that the microseconds do not exceed 1,000,000.
+ * If the result exceeds 1,000,000 microseconds, it increments the seconds accordingly
+ * and adjusts the microseconds.
+ * @param a      Pointer to the first timeval structure.
+ * @param b      Pointer to the second timeval structure.
+ * @param result Pointer to the timeval structure where the result will be stored.
+ * @return None
+ */
 void timeval_add(const struct timeval *a, const struct timeval *b, struct timeval *result)
 {
-    if (!a || !b || !result)
-        return;
-        
-    result->tv_sec = a->tv_sec + b->tv_sec;
-    result->tv_usec = a->tv_usec + b->tv_usec;
-    if (result->tv_usec >= 1000000) {
-        result->tv_sec++;
-        result->tv_usec -= 1000000;
-    }
+	if (!a || !b || !result)
+		return;
+
+	result->tv_sec = a->tv_sec + b->tv_sec;
+	result->tv_usec = a->tv_usec + b->tv_usec;
+	if (result->tv_usec >= 1000000) {
+		result->tv_sec++;
+		result->tv_usec -= 1000000;
+	}
 }
 
+/**
+ * Subtracts two timeval structures and stores the result in a third timeval structure.
+ * This function handles the subtraction of seconds and microseconds,
+ * ensuring that the microseconds do not become negative.
+ * If the result's microseconds are negative, it decrements the seconds
+ * and adjusts the microseconds accordingly.
+ * @param a      Pointer to the first timeval structure.
+ * @param b      Pointer to the second timeval structure.
+ * @param result Pointer to the timeval structure where the result will be stored.
+ * @return None
+ */
 void timeval_sub(const struct timeval *a, const struct timeval *b, struct timeval *result)
 {
-    if (!a || !b || !result)
-        return;
-        
-    result->tv_sec = a->tv_sec - b->tv_sec;
-    result->tv_usec = a->tv_usec - b->tv_usec;
-    if (result->tv_usec < 0) {
-        result->tv_sec--;
-        result->tv_usec += 1000000;
-    }
+	if (!a || !b || !result)
+		return;
+
+	result->tv_sec = a->tv_sec - b->tv_sec;
+	result->tv_usec = a->tv_usec - b->tv_usec;
+	if (result->tv_usec < 0) {
+		result->tv_sec--;
+		result->tv_usec += 1000000;
+	}
 }
 
+/**
+ * Compares two timeval structures.
+ * This function compares the seconds and microseconds of the two timeval structures.
+ * It returns:
+ * -1 if the first timeval is less than the second,
+ * 1 if the first timeval is greater than the second,
+ * 0 if they are equal.
+ * @param a Pointer to the first timeval structure.
+ * @param b Pointer to the second timeval structure.
+ * @return An integer indicating the comparison result:
+ */
 int timeval_cmp(const struct timeval *a, const struct timeval *b)
 {
-    if (!a || !b)
-        return 0;
-        
-    if (a->tv_sec < b->tv_sec)
-        return -1;
-    if (a->tv_sec > b->tv_sec)
-        return 1;
-    if (a->tv_usec < b->tv_usec)
-        return -1;
-    if (a->tv_usec > b->tv_usec)
-        return 1;
-    return 0;
+	if (!a || !b)
+		return 0;
+
+	if (a->tv_sec < b->tv_sec)
+		return -1;
+	if (a->tv_sec > b->tv_sec)
+		return 1;
+	if (a->tv_usec < b->tv_usec)
+		return -1;
+	if (a->tv_usec > b->tv_usec)
+		return 1;
+	return 0;
 }
 
+/**
+ * Calculates the checksum for a buffer.
+ * This function computes the checksum for a given buffer
+ * by summing up the 16-bit words in the buffer.
+ * If the buffer length is odd, it pads the last byte with zero.
+ * It then folds any carries from the top 16 bits into the lower 16 bits
+ * and returns the one's-complement of the sum as a 16-bit value.
+ * @param buf Pointer to the buffer containing the data.
+ * @param len Length of the buffer in bytes.
+ * @return The calculated checksum as a 16-bit unsigned integer.
+ */
 uint16_t checksum(void *buf, size_t len)
 {
-    uint32_t sum = 0;
-    uint16_t *data = buf;
+	uint32_t  sum = 0;
+	uint16_t *data = buf;
 
-    // Sum up 16-bit words
-    while (len > 1) {
-        sum += *data++;
-        len  -= 2;
-    }
+	// Sum up 16-bit words
+	while (len > 1) {
+		sum += *data++;
+		len -= 2;
+	}
 
-    // If there's a leftover byte, pad with zero to form a 16-bit word
-    if (len == 1) {
-        uint8_t  tail[2] = { *(uint8_t*)data, 0 };
-        sum += *(uint16_t*)tail;
-    }
+	// If there's a leftover byte, pad with zero to form a 16-bit word
+	if (len == 1) {
+		uint8_t tail[2] = {*(uint8_t *)data, 0};
+		sum += *(uint16_t *)tail;
+	}
 
-    // Fold any carries from the top 16 bits into the lower 16 bits
-    while (sum >> 16) {
-        sum = (sum & 0xFFFF) + (sum >> 16);
-    }
+	// Fold any carries from the top 16 bits into the lower 16 bits
+	while (sum >> 16) {
+		sum = (sum & 0xFFFF) + (sum >> 16);
+	}
 
-    // One's-complement and return
-    return (uint16_t)~sum;
+	// One's-complement and return
+	return (uint16_t)~sum;
 }
 
+/**
+ * Signal handler for SIGINT.
+ * This function is called when the program receives a SIGINT signal (usually from Ctrl+C).
+ * It prints the global statistics for the current ping session
+ * and exits the program gracefully.
+ * @param sig The signal number received (in this case, SIGINT).
+ * @return None
+ */
 void signal_handler(int sig)
 {
-    if (sig == SIGINT){
-		t_ping *ping = &g_data->ping[g_data->ping_index];
+	if (sig == SIGINT) {
+		t_ping		 *ping = &g_data->ping[g_data->ping_index];
 		t_ping_stats *stats = &g_data->stats[g_data->ping_index];
 		print_global_stats(ping, stats);
 		exit(EXIT_SUCCESS);
 	}
 }
 
+/**
+ * Displays the help message for the ping command.
+ * This function prints the usage information,
+ * including the command syntax and available options.
+ * It provides a brief description of each option,
+ * such as enabling verbose output or showing help.
+ * This function is called when the user requests help
+ * or when the command is run with the `-h` or `--help` option
+ * to provide guidance on how to use the ping command.
+ * @param None
+ * @return None
+ */
 void help(void)
 {
-    fprintf(stdout, "Usage: ping [options] <host>\n");
-    fprintf(stdout, "Options:\n");
-    fprintf(stdout, "  -h, --help        Show this help message and exit\n");
-    fprintf(stdout, "  -v, --verbose     Enable verbose output\n");
+    size_t len = 0;
+    char buf[HELP_BUF_LEN] = {0};
+
+	len = snprintf(buf, HELP_BUF_LEN, "Usage: ping [options] <host>\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "Options:\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "  -h, --help        Show this help message and exit\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "  -v, --verbose     Enable verbose output\n");
+
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "  -c, --count <n>   Stop after sending <n> packets\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "  -i, --interval <n> Set interval between packets to <n> seconds\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "  -q, --quiet       Suppress output except for errors\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "  -f, --flood       Flood ping (send packets as fast as possible)\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "  -w, --timeout <n> Set timeout for each packet to <n> seconds\n");
+	len += snprintf(buf + len, HELP_BUF_LEN - len, "\n");
+
+	_(STDOUT_FILENO, buf);
 }
 
+/**
+ * Exits the program with a failure status and prints an error message.
+ * This function formats the error message with a prefix "ping: "
+ * and writes it to the standard error file descriptor.
+ * It then terminates the program with an exit status of EXIT_FAILURE.
+ * @param msg The error message to be printed before exiting.
+ * @return None
+ */
 void exit_failure(const char *msg)
 {
-    _(STDERR_FILENO, msg);
-    exit(EXIT_FAILURE);
-}
-
-t_icmphdr *get_inner_icmp_header(char *buf)
-{
-    /* 1. Skip the OUTER IPv4 header */
-    struct iphdr *ip_outer = (struct iphdr *)buf;
-    size_t outer_ip_len    = ip_outer->ihl * 4;
-
-    uint8_t *pointer = (uint8_t *)buf + outer_ip_len;
-
-    /* 2. Skip the OUTER ICMP Time-Exceeded header (always 8 bytes) */
-    pointer += 8;
-
-    /* 3. p now points at the QUOTED inner IPv4 header */
-    struct iphdr *ip_inner = (struct iphdr *)pointer;
-    size_t inner_ip_len    = ip_inner->ihl * 4;
-    pointer += inner_ip_len;
-
-    /* 4. p now points at the QUOTED inner ICMP Echo header */
-    struct icmphdr *icmp_inner = (struct icmphdr *)pointer;
-
-    return icmp_inner;
-}
-
-t_icmphdr *get_outer_icmp_header(char *buf)
-{
-    /* 1. Skip the OUTER IPv4 header */
-	struct iphdr *ip_outer = (struct iphdr *)buf;
-	size_t outer_ip_len    = ip_outer->ihl * 4;
-    
-	uint8_t *pointer = (uint8_t *)buf + outer_ip_len;
-    
-	/* 2. Skip the OUTER ICMP Time-Exceeded header (always 8 bytes) */
-	struct icmphdr *icmp_outer = (struct icmphdr *)pointer;
-
-    return icmp_outer;
-}
-
-t_iphdr *get_outer_ip_header(char *buf)
-{
-    return (struct iphdr *)buf;
-}
-
-// Helper function to get IP string from sockaddr_storage
-char* get_ip_string(const t_sockaddr *addr)
-{
-    static char ip_str[INET6_ADDRSTRLEN];
-    
-    struct sockaddr_in *addr4 = (struct sockaddr_in*)addr;
-    inet_ntop(AF_INET, &addr4->sin_addr, ip_str, INET_ADDRSTRLEN);
-    
-    return ip_str;
+	_(STDERR_FILENO, msg);
+	exit(EXIT_FAILURE);
 }
