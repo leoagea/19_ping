@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 17:34:06 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/24 14:53:58 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/24 18:10:20 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,31 +76,21 @@ void build_echo_request(char *buf, size_t payload_len, int count)
  */
 static int check_response_header(char *buf, int count)
 {
-	char pbuf[BUF_LEN] = {0};
 	struct icmphdr *icmph = (struct icmphdr *)buf;
 
 	if (icmph->type != ICMP_ECHOREPLY) {
-		snprintf(pbuf, BUF_LEN, "Received non-echo reply packet: type %d\n", icmph->type);
-		print_error(pbuf);
 		return -1;
 	}
 
 	if (icmph->code != 0) {
-		snprintf(pbuf, BUF_LEN, "Received packet with non-zero code: %d\n", icmph->code);
-		print_error(pbuf);
 		return -1;
 	}
 
 	if (icmph->un.echo.id != htons(getpid() & 0xFFFF)) {
-		snprintf(pbuf, BUF_LEN, "Received packet with invalid identifier: %d\n", ntohs(icmph->un.echo.id));
-		print_error(pbuf);
 		return -1;
 	}
 
 	if (!g_data->arg->flood && ntohs(icmph->un.echo.sequence) != count) {
-		snprintf(pbuf, BUF_LEN, "Received packet with invalid sequence number: %d\n",
-				ntohs(icmph->un.echo.sequence));
-		print_error(pbuf);
 		return -1;
 	}
 	return 0;

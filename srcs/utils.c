@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/03 14:16:40 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/24 14:53:27 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/26 14:44:42 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,13 @@ void print_error(const char *msg)
  */
 void usage(void)
 {
-	print_error("ping: missing host operand");
-	print_error("Try 'ping --help' for more information.");
+	size_t len = 0;
+	char buf[1024] = {0};
+	
+	len = snprintf(buf, sizeof(buf),"ping: missing host operand\n");
+	snprintf(buf + len, sizeof(buf) - len, "Try 'ping --help' for more information.\n");
+
+	_(STDERR_FILENO, buf);
 }
 
 
@@ -165,6 +170,17 @@ void signal_handler(int sig)
 		t_ping		 *ping = &g_data->ping[g_data->ping_index];
 		t_ping_stats *stats = &g_data->stats[g_data->ping_index];
 		print_global_stats(ping, stats);
+		g_data->ping_index++;
+		for (size_t i = g_data->ping_index; i < g_data->ping_nb; i++) {
+			t_ping		 *ping = &g_data->ping[g_data->ping_index];
+			t_ping_stats *stats = &g_data->stats[g_data->ping_index];
+			checkTarget(ping, g_data->arg->inputs[i]);
+			if (!ping->is_valid)
+				continue;
+			print_ping_info(ping);
+			print_global_stats(ping, stats);
+			g_data->ping_index++;
+		}
 		exit(EXIT_SUCCESS);
 	}
 }

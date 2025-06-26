@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 16:04:42 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/24 14:41:59 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/26 14:00:30 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,12 +81,16 @@ void parse_arg(t_data *data)
 
 	init_options(opt);
 
-	const char		   *short_opts = "hvc:i:qfw:";
+	const char		   *short_opts = "h?vc:i:qfw:";
 	const struct option long_opts[] = {
-		{"help", no_argument, NULL, 'h'},		   {"verbose", no_argument, NULL, 'v'},
-		{"count", required_argument, NULL, 'c'},   {"interval", required_argument, NULL, 'i'},
-		{"quiet", no_argument, NULL, 'q'},		   {"flood", required_argument, NULL, 'f'},
-		{"timeout", required_argument, NULL, 'w'}, {NULL, 0, NULL, 0}};
+		{"help", no_argument, NULL, 'h'},
+		{"verbose", no_argument, NULL, 'v'},
+		{"count", required_argument, NULL, 'c'},
+		{"interval", required_argument, NULL, 'i'},
+		{"quiet", no_argument, NULL, 'q'},
+		{"flood", required_argument, NULL, 'f'},
+		{"timeout", required_argument, NULL, 'w'},
+		{NULL, 0, NULL, 0}};
 
 	int option;
 	while ((option = getopt_long(data->ac, data->av, short_opts, long_opts, NULL)) != -1) {
@@ -94,33 +98,44 @@ void parse_arg(t_data *data)
 			case 'h':
 				help();
 				exit(EXIT_SUCCESS);
-
+			
 			case 'v':
 				opt->verbose = true;
 				break;
-
+				
 			case 'c':
 				parse_optarg(opt, optarg, "count");
 				break;
-
+				
 			case 'i':
 				parse_optarg(opt, optarg, "interval");
 				break;
-
+				
 			case 'q':
 				opt->quiet = true;
 				break;
-
+				
 			case 'f':
 				opt->quiet = true;
 				opt->flood = true;
 				break;
-
+				
 			case 'w':
 				parse_optarg(opt, optarg, "timeout");
 				break;
-
+				
 			case '?':
+				if (optopt == 0){
+					help();
+					exit(EXIT_SUCCESS);
+				}
+				else {
+					char buf[256];
+					snprintf(buf, sizeof(buf), "Try 'ping --help' for more information.\n");
+					exit_failure(buf);
+				}
+				break;
+
 			default:
 				_(STDERR_FILENO, "Try 'ping --help' for more information.\n");
 				exit(EXIT_FAILURE);

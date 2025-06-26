@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/16 15:21:22 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/24 14:41:31 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/26 14:42:36 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,14 +50,25 @@ void print_global_stats(t_ping *ping, t_ping_stats *stats)
 {
 	char   buf[BUF_LEN] = {0};
 	size_t len = 0;
+	float percent_lost = 0;
 	char  *hostname =
 		 ping->target_hostname ? ping->target_hostname : get_ip_string((t_sockaddr *)&ping->addr);
 
 	len = snprintf(buf, BUF_LEN, "--- %s ping statistics ---\n", hostname);
+
+	if (stats->packets_received == 0 && stats->packets_sent == 0) {
+		percent_lost = 0;
+	}
+	else if (stats->packets_received == 0) {
+		percent_lost = 100;
+	} else {
+		percent_lost = (stats->packets_lost * 100) / stats->packets_sent;
+	}
+
 	len += snprintf(buf + len, BUF_LEN - len,
 					"%d packets transmitted, %d packets received, %.0f%% packet loss\n",
 					stats->packets_sent, stats->packets_received,
-					(double)stats->packets_lost / stats->packets_sent * 100.0);
+					(double)percent_lost);
 
 	double avg_rtt = rtt_avg_calculate(ping);
 	double stddev_rtt = stddev_calculate(ping, avg_rtt);
