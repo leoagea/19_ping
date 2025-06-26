@@ -6,7 +6,7 @@
 /*   By: lagea < lagea@student.s19.be >             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/18 16:04:42 by lagea             #+#    #+#             */
-/*   Updated: 2025/06/26 14:00:30 by lagea            ###   ########.fr       */
+/*   Updated: 2025/06/26 14:50:07 by lagea            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ void parse_arg(t_data *data)
 				break;
 				
 			case '?':
-				if (optopt == 0){
+				if (optopt == 0 || optopt == '?') {
 					help();
 					exit(EXIT_SUCCESS);
 				}
